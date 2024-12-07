@@ -49,9 +49,9 @@ def search():
         # Query the database
         if entity == 'managers':
             if firstname:
-                query = f"SELECT * FROM managers WHERE first_name LIKE %s"
+                query = f"SELECT * FROM {entity} WHERE first_name LIKE %s"
             if lastname:
-                query = f"SELECT * FROM managers WHERE last_name LIKE %s"
+                query = f"SELECT * FROM {entity} WHERE last_name LIKE %s"
         else:
             query = f"SELECT * FROM {entity} WHERE name LIKE %s"
         cursor.execute(query, (f"%{name}%",))
