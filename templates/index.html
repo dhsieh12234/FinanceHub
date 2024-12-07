@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Query System</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="scripts.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2>Navigation</h2>
+            <ul>
+                <li><a href="#" onclick="showWindow('companies')">Companies</a></li>
+                <li><a href="#" onclick="showWindow('investment_banks')">Investment Banks</a></li>
+                <li><a href="#" onclick="showWindow('invest_firms')">Investment Firms</a></li>
+                <li><a href="#" onclick="showWindow('managers')">Managers</a></li>
+                <li><a href="#" onclick="showWindow('portfolios')">Portfolios</a></li>
+                <li><a href="#" onclick="showWindow('stocks')">Stocks</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Companies Window -->
+            <div id="companies" class="window active">
+                <h1>Companies</h1>
+                <input type="text" id="search_companies" placeholder="Search Companies by Name">
+                <button onclick="search('companies')">Search</button>
+                <div id="results_companies" class="results"></div>
+            </div>
+
+            <!-- Investment Banks Window -->
+            <div id="investment_banks" class="window">
+                <h1>Investment Banks</h1>
+                <input type="text" id="search_investment_banks" placeholder="Search Investment Banks by Name">
+                <button onclick="search('investment_banks')">Search</button>
+                <div id="results_investment_banks" class="results"></div>
+            </div>
+
+            <!-- Investment Firms Window -->
+            <div id="invest_firms" class="window">
+                <h1>Investment Firms</h1>
+                <input type="text" id="search_invest_firms" placeholder="Search Investment Firms by Name">
+                <button onclick="search('invest_firms')">Search</button>
+                <div id="results_invest_firms" class="results"></div>
+            </div>
+
+            <!-- Managers Window -->
+            <div id="managers" class="window">
+                <h1>Managers</h1>
+                <input type="text" id="search_managers" placeholder="Search Managers by Name">
+                <button onclick="search('managers')">Search</button>
+                <div id="results_managers" class="results"></div>
+            </div>
+
+            <!-- Portfolios Window -->
+            <div id="portfolios" class="window">
+                <h1>Portfolios</h1>
+                <input type="text" id="search_portfolios" placeholder="Search Portfolios by Name">
+                <button onclick="search('portfolios')">Search</button>
+                <div id="results_portfolios" class="results"></div>
+            </div>
+
+            <!-- Stocks Window -->
+            <div id="stocks" class="window">
+                <h1>Stocks</h1>
+                <input type="text" id="search_stocks" placeholder="Search Stocks by Name">
+                <button onclick="search('stocks')">Search</button>
+                <div id="results_stocks" class="results"></div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
