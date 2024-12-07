@@ -1,17 +1,19 @@
 import mysql.connector
 import pandas as pd
 import reader
+from mysql.connector import Error
 
 class Writer:
-    def __init__(self):
+    def __init__(self, passwd):
         self.reader = reader.Reader()
+        self.passwd = passwd
     
     def connect_to_database(self):
         # First connect without database specified
         db_config = {
             'host': 'localhost',
             'user': 'root',
-            'password': 'YOURPASSWORDHERE'
+            'password': self.passwd
         }
         try:
             connection = mysql.connector.connect(**db_config)

@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 class Reader:
-    def _init_(self):
+    def __init__(self):
         self.script_dir = os.path.dirname(os.path.abspath(__file__))
         self.data_folder_path = os.path.join(self.script_dir, '../data')
         # Load the pickle files
