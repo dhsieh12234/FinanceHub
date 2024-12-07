@@ -51,7 +51,7 @@
             <div id="invest_firms" class="window">
                 <h1>Investment Firms</h1>
                 <input type="text" id="search_invest_firms" placeholder="Search Investment Firms by Name">
-                <button onclick="search('invest_firms')">Search</button>
+                <button onclick="search('investment_firms')">Search</button>
                 <div id="results_invest_firms" class="results"></div>
             </div>
 
@@ -59,6 +59,16 @@
             <div id="managers" class="window">
                 <h1>Managers</h1>
                 <input type="text" id="search_managers" placeholder="Search Managers by Name">
+                <div>
+                    <label>
+                        <input type="checkbox" id="search_firstname" checked>
+                        First Name
+                    </label>
+                    <label>
+                        <input type="checkbox" id="search_lastname" checked>
+                        Last Name
+                    </label>
+                </div>
                 <button onclick="search('managers')">Search</button>
                 <div id="results_managers" class="results"></div>
             </div>

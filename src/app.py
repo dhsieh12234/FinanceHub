@@ -37,6 +37,8 @@ def submit_password():
 def search():
     entity = request.args.get('entity')
     name = request.args.get('name')
+    firstname = request.args.get('firstname') == 'true'  # Convert to boolean
+    lastname = request.args.get('lastname') == 'true'    # Convert to boolean
 
     if not writer_instance:
         return jsonify({"error": "Database not initialized. Please submit the password first."})
@@ -44,9 +46,14 @@ def search():
     try:
         connection = writer_instance.connect_to_database()
         cursor = connection.cursor(dictionary=True)
-
         # Query the database
-        query = f"SELECT * FROM {entity} WHERE name LIKE %s"
+        if entity == 'managers':
+            if firstname:
+                query = f"SELECT * FROM managers WHERE first_name LIKE %s"
+            if lastname:
+                query = f"SELECT * FROM managers WHERE last_name LIKE %s"
+        else:
+            query = f"SELECT * FROM {entity} WHERE name LIKE %s"
         cursor.execute(query, (f"%{name}%",))
         results = cursor.fetchall()
 
