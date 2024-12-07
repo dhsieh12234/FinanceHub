@@ -52,9 +52,10 @@ def search():
                 query = f"SELECT * FROM {entity} WHERE first_name LIKE %s"
             if lastname:
                 query = f"SELECT * FROM {entity} WHERE last_name LIKE %s"
+            cursor.execute(query, (f"%{name}%", f"%{name}%"))
         else:
             query = f"SELECT * FROM {entity} WHERE name LIKE %s"
-        cursor.execute(query, (f"%{name}%",))
+            cursor.execute(query, (f"%{name}%",))
         results = cursor.fetchall()
 
         return jsonify(results)
