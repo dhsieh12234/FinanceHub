@@ -24,3 +24,29 @@ function search(category) {
         resultsDiv.innerHTML = `<p>Please enter a search term.</p>`;
     }
 }
+
+async function submitPassword() {
+    const password = document.getElementById('root-password').value;
+    const errorDiv = document.getElementById('password-error');
+    errorDiv.textContent = ''; // Clear previous error messages
+
+    try {
+        const response = await fetch('/submit-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            // Hide the password form and show the main content
+            document.getElementById('password-form').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        } else {
+            errorDiv.textContent = data.error || 'Invalid password.';
+        }
+    } catch (err) {
+        errorDiv.textContent = 'Error connecting to the server.';
+    }
+}
+
