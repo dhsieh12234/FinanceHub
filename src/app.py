@@ -46,26 +46,47 @@ def search():
     try:
         connection = writer_instance.connect_to_database()
         cursor = connection.cursor(dictionary=True)
-        # Query the database
+
+        # Initialize query and params
+        query = None
+        params = []
+
+        # Build the query dynamically
         if entity == 'managers':
+            conditions = []
             if firstname:
-                query = f"SELECT * FROM {entity} WHERE first_name LIKE %s"
+                conditions.append("first_name LIKE %s")
+                params.append(f"%{name}%")
             if lastname:
-                query = f"SELECT * FROM {entity} WHERE last_name LIKE %s"
-            cursor.execute(query, (f"%{name}%", f"%{name}%"))
+                conditions.append("last_name LIKE %s")
+                params.append(f"%{name}%")
+
+            if conditions:  # Ensure there are conditions before constructing the query
+                query = f"SELECT * FROM managers WHERE {' OR '.join(conditions)}"
+            else:
+                return jsonify({"error": "No valid search criteria provided for managers."}), 400
         else:
+            # Generic query for other entities
             query = f"SELECT * FROM {entity} WHERE name LIKE %s"
-            cursor.execute(query, (f"%{name}%",))
+            params = [f"%{name}%"]
+
+        # Ensure query is assigned before execution
+        if not query:
+            return jsonify({"error": "Failed to construct a valid query."}), 400
+
+        # Execute the query
+        cursor.execute(query, params)
         results = cursor.fetchall()
 
         return jsonify(results)
     except mysql.connector.Error as error:
-        return jsonify({"error": str(error)})
+        return jsonify({"error": str(error)}), 500
     finally:
         if cursor:
             cursor.close()
         if connection:
             connection.close()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
