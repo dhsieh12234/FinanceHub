@@ -87,6 +87,46 @@ def search():
         if connection:
             connection.close()
 
+@app.route('/stocks/search', methods=['GET'])
+def search_stocks():
+    min_price = request.args.get('min_price', type=float)  # Convert to float
+    max_price = request.args.get('max_price', type=float)  # Convert to float
+
+    if not writer_instance:
+        return jsonify({"error": "Database not initialized. Please submit the password first."}), 400
+
+    try:
+        connection = writer_instance.connect_to_database()
+        cursor = connection.cursor(dictionary=True)
+
+        # Build the query dynamically
+        conditions = []
+        params = []
+        if min_price is not None:
+            conditions.append("year_end_price >= %s")
+            params.append(min_price)
+        if max_price is not None:
+            conditions.append("year_end_price <= %s")
+            params.append(max_price)
+
+        if not conditions:
+            return jsonify({"error": "Please provide at least one condition."}), 400
+
+        query = f"SELECT * FROM stocks WHERE {' AND '.join(conditions)}"
+        print(f"Executing query: {query} with params: {params}")  # Debugging
+
+        cursor.execute(query, params)
+        results = cursor.fetchall()
+
+        return jsonify(results)
+    except mysql.connector.Error as error:
+        print(f"Database error: {error}")
+        return jsonify({"error": str(error)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
 if __name__ == '__main__':
     app.run(debug=True)
