@@ -9,28 +9,27 @@
 </head>
 <body>
     <div class="container">
-         <!-- Password Input Form -->
-         <div id="password-form">
+         <!-- Password Form -->
+        <div id="password-form" class="full-screen">
             <h1>Enter MySQL Root Password</h1>
             <input type="password" id="root-password" placeholder="Enter Root Password">
             <button onclick="submitPassword()">Submit</button>
             <div id="password-error" class="error-message"></div>
         </div>
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <h2>Navigation</h2>
-            <ul>
-                <li><a href="#" onclick="showWindow('companies')">Companies</a></li>
-                <li><a href="#" onclick="showWindow('investment_banks')">Investment Banks</a></li>
-                <li><a href="#" onclick="showWindow('invest_firms')">Investment Firms</a></li>
-                <li><a href="#" onclick="showWindow('managers')">Managers</a></li>
-                <li><a href="#" onclick="showWindow('portfolios')">Portfolios</a></li>
-                <li><a href="#" onclick="showWindow('stocks')">Stocks</a></li>
-            </ul>
-        </aside>
-
         <!-- Main Content -->
-        <main class="content">
+        <main class="content", class="hidden">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <h2>Navigation</h2>
+                <ul>
+                    <li><a href="#" onclick="showWindow('companies')">Companies</a></li>
+                    <li><a href="#" onclick="showWindow('investment_banks')">Investment Banks</a></li>
+                    <li><a href="#" onclick="showWindow('invest_firms')">Investment Firms</a></li>
+                    <li><a href="#" onclick="showWindow('managers')">Managers</a></li>
+                    <li><a href="#" onclick="showWindow('portfolios')">Portfolios</a></li>
+                    <li><a href="#" onclick="showWindow('stocks')">Stocks</a></li>
+                </ul>
+            </aside>
             <!-- Companies Window -->
             <div id="companies" class="window active">
                 <h1>Companies</h1>
@@ -90,5 +89,6 @@
             </div>
         </main>
     </div>
+    <div class="webpage-mark">FL2024 Databases Final Project</div>
 </body>
 </html>
