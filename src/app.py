@@ -45,6 +45,9 @@ def search():
     max_shares = request.args.get('max_shares', None)
     location = request.args.get('location', '')
     industry = request.args.get('industry', '')
+    investment_firm = request.args.get('investment_firm', '')
+    min_years_experience = int(request.args.get('min_years_experience', 0))
+    max_years_experience = int(request.args.get('max_years_experience', 50))
 
     try:
         connection = writer_instance.connect_to_database()
@@ -109,17 +112,81 @@ def search():
                         f"%{industry}%", industry or '',
                     )
         elif entity == 'managers':
+            # Base query
             query = """
-                SELECT * FROM managers
-                WHERE first_name LIKE %s OR last_name LIKE %s
+                SELECT managers.certification_ID, managers.first_name, managers.last_name,
+                    managers.investment_firm_name, managers.years_experience,
+                    managers.investment_expertise, managers.personal_intro,
+                    portfolios.name AS portfolio
+                FROM managers
+                LEFT JOIN portfolios ON managers.certification_ID = portfolios.manager_ID
+                LEFT JOIN investment_firms ON managers.investment_firm_name = investment_firms.name
+                WHERE 1=1
             """
-            params = (f"%{name}%", f"%{name}%")
+
+            # Filters
+            filters = []
+            params = []
+
+            # Filter by name
+            if name:
+                filters.append("(managers.first_name LIKE %s OR managers.last_name LIKE %s)")
+                params.extend([f"%{name}%", f"%{name}%"])
+
+            # Filter by investment firm
+            if investment_firm:
+                filters.append("managers.investment_firm_name LIKE %s")
+                params.append(f"%{investment_firm}%")
+
+            # Filter by years of experience
+            if min_years_experience or max_years_experience:
+                filters.append("managers.years_experience BETWEEN %s AND %s")
+                params.extend([
+                    min_years_experience or 0,
+                    max_years_experience or 50
+                ])
+
+            # Append filters to the query
+            if filters:
+                query += " AND " + " AND ".join(filters)
+
+            # Execute the query
+            cursor.execute(query, tuple(params))
+
         elif entity == 'investment_banks':
             query = """
-                SELECT * FROM investment_banks
-                WHERE name LIKE %s
+                SELECT investment_banks.name, investment_banks.location,
+                    investment_banks.industries, investment_banks.ceo_name
+                FROM investment_banks
+                WHERE 1=1
             """
-            params = (f"%{name}%",)
+
+            # Filters
+            filters = []
+            params = []
+
+            # Filter by name
+            if name:
+                filters.append("investment_banks.name LIKE %s")
+                params.append(f"%{name}%")
+
+            # Filter by location
+            if location:
+                filters.append("investment_banks.location LIKE %s")
+                params.append(f"%{location}%")
+
+            # Filter by industry
+            if industry:
+                filters.append("investment_banks.industries LIKE %s")
+                params.append(f"%{industry}%")
+
+            # Append filters to the query
+            if filters:
+                query += " AND " + " AND ".join(filters)
+
+            # Execute the query
+            cursor.execute(query, tuple(params))
+
         elif entity == 'investment_firms':
             query = """
                 SELECT * FROM investment_firms
@@ -128,10 +195,48 @@ def search():
             params = (f"%{name}%",)
         elif entity == 'portfolios':
             query = """
-                SELECT * FROM portfolios
-                WHERE name LIKE %s
+                SELECT 
+                    portfolios.name AS portfolio_name,
+                    portfolios.foundation_date,
+                    portfolios.year_end_market_value,
+                    portfolios.year_end_holders,
+                    managers.first_name AS manager_first_name,
+                    managers.last_name AS manager_last_name,
+                    portfolio_stock_relations.stock_code AS stock_code,
+                    stocks.name AS stock_name
+                FROM portfolios
+                LEFT JOIN managers 
+                    ON portfolios.manager_ID = managers.certification_ID
+                LEFT JOIN portfolio_stock_relations 
+                    ON portfolios.portfolio_code = portfolio_stock_relations.portfolio_code
+                LEFT JOIN stocks 
+                    ON portfolio_stock_relations.stock_code = stocks.stock_code
+                WHERE 1=1
             """
-            params = (f"%{name}%",)
+            filters = []
+            params = []
+
+            # Stock symbol filter
+            if stock_symbol:
+                filters.append("stocks.stock_code LIKE %s")
+                params.append(f"%{stock_symbol}%")
+
+            # Min and Max Year-End Market Value
+            if min_market_value or max_market_value:
+                filters.append("portfolios.year_end_market_value BETWEEN %s AND %s")
+                params.extend([min_market_value or 0, max_market_value or float('inf')])
+
+            # Min and Max Year-End Holders
+            if min_holders or max_holders:
+                filters.append("portfolios.year_end_holders BETWEEN %s AND %s")
+                params.extend([min_holders or 0, max_holders or float('inf')])
+
+            # Apply filters
+            if filters:
+                query += " AND " + " AND ".join(filters)
+
+            cursor.execute(query, tuple(params))
+
         else:
             return jsonify({"error": f"Unsupported entity type: {entity}"}), 400
 

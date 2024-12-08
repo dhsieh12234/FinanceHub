@@ -283,6 +283,214 @@
                     onclick="lockInSearchCompanies()">Search</button>
         </div>
         
+        <!-- Left Sidebar for Investment Banks (Initially Hidden) -->
+        <div id="left-sidebar-banks" class="left-sidebar hidden">
+            <h3>Investment Bank Filters</h3>
+
+            <!-- Display Options -->
+            <h3>Display Options</h3>
+            <div class="display-options">
+                <label>
+                    <input type="checkbox" name="bank_display_option" value="name" onchange="updateBankDisplayPreferences()">
+                    Show Name
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="bank_display_option" value="location" onchange="updateBankDisplayPreferences()">
+                    Show Location
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="bank_display_option" value="industries" onchange="updateBankDisplayPreferences()">
+                    Show Industries
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="bank_display_option" value="ceo_name" onchange="updateBankDisplayPreferences()">
+                    Show CEO Name
+                </label>
+            </div>
+
+            <div class="dropdown-container">
+                <h3>Industry</h3>
+                <select id="industry-dropdown">
+                    <option value="" disabled selected>-- Select an Industry --</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Consumer Goods">Consumer Goods</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Energy">Energy</option>
+                </select>
+            </div>
+
+            <div class="dropdown-container">
+                <h3>Location</h3>
+                <select id="location-dropdown">
+                    <option value="" disabled selected>-- Select a Location --</option>
+                    <option value="Tokyo">Tokyo</option>
+                    <option value="San Francisco">San Francisco</option>
+                    <option value="Toronto">Toronto</option>
+                    <option value="New York">New York</option>
+                    <option value="Singapore">Singapore</option>
+                    <option value="Frankfurt">Frankfurt</option>
+                    <option value="Paris">Paris</option>
+                </select>
+            </div>
+
+            <!-- Lock In Search Button -->
+            <button onclick="lockInSearchBanks()">Lock In Search</button>
+        </div>
+
+        <!-- Left Sidebar for Managers (Initially Hidden) -->
+        <div id="left-sidebar-managers" class="left-sidebar hidden">
+            <h3>Manager Filters</h3>
+            <!-- Add content here for future manager filters -->
+
+            <!-- Display Options -->
+            <h3>Display Options</h3>
+            <div class="display-options">
+                <label>
+                    <input type="checkbox" name="manager_display_option" value="investment_firm" onchange="updateManagerDisplayPreferences()">
+                    Show Investment Firm
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="manager_display_option" value="name" onchange="updateManagerDisplayPreferences()">
+                    Show Name
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="manager_display_option" value="personal_intro_text" onchange="updateManagerDisplayPreferences()">
+                    Show Personal Intro Text
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="manager_display_option" value="years_experience" onchange="updateManagerDisplayPreferences()">
+                    Show Years of Experience
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="manager_display_option" value="id" onchange="updateManagerDisplayPreferences()">
+                    Show ID
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="manager_display_option" value="field_of_experience" onchange="updateManagerDisplayPreferences()">
+                    Show Field of Experience
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="manager_display_option" value="portfolio" onchange="updateManagerDisplayPreferences()">
+                    Show Portfolio
+                </label>
+            </div>
+
+            <!-- Dropdown for Investment Firm -->
+            <div class="dropdown-container">
+                <h3>Filter on Investment Firm</h3>
+                <select id="investment-firm-dropdown">
+                    <option value="" disabled selected>-- Select an Investment Firm --</option>
+                    <option value="BlackRock">BlackRock</option>
+                    <option value="Vanguard">Vanguard</option>
+                    <option value="Fidelity">Fidelity</option>
+                    <option value="State Street">State Street</option>
+                    <option value="JPMorgan Asset Management">JPMorgan Asset Management</option>
+                    <option value="Goldman Sachs Asset Management">Goldman Sachs Asset Management</option>
+                    <option value="Morgan Stanley Investment Management">Morgan Stanley Investment Management</option>
+                    <option value="PIMCO">PIMCO</option>
+                    <option value="Wellington Management">Wellington Management</option>
+                    <option value="Capital Group">Capital Group</option>
+                </select>
+            </div>
+
+            <!-- Min and Max Years of Experience -->
+            <div class="years-experience-container">
+                <h3>Years of Experience</h3>
+                <label for="min-years-experience">Min:</label>
+                <input type="number" id="min-years-experience" placeholder="0" min="0">
+                <br>
+                <label for="max-years-experience">Max:</label>
+                <input type="number" id="max-years-experience" placeholder="50" min="0">
+            </div>
+
+            <!-- Lock In Search Button -->
+            <button onclick="lockInSearchManagers()">Lock In Search</button>
+        </div>
+
+        <!-- Left Sidebar for Portfolios (Initially Hidden) -->
+        <div id="left-sidebar-portfolios" class="left-sidebar hidden">
+            <h3>Portfolio Filters</h3>
+
+            <!-- Display Options -->
+            <h3>Display Options</h3>
+            <div class="display-options">
+                <label>
+                    <input type="checkbox" class="portfolio-display-option" value="portfolio_name" onchange="updatePortfolioDisplayPreferences()">
+                    Portfolio Name
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" class="portfolio-display-option" value="stock" onchange="updatePortfolioDisplayPreferences()">
+                    Stock
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" class="portfolio-display-option" value="foundation_date" onchange="updatePortfolioDisplayPreferences()">
+                    Date of Foundation
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" class="portfolio-display-option" value="manager" onchange="updatePortfolioDisplayPreferences()">
+                    Manager
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" class="portfolio-display-option" value="holders" onchange="updatePortfolioDisplayPreferences()">
+                    Number of Holders
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" class="portfolio-display-option" value="year_end_market_value" onchange="updatePortfolioDisplayPreferences()">
+                    Year-End Market Value
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" id="portfolio-select-all" onchange="selectAllPortfolioDisplayOptions()">
+                    Select All
+                </label>
+            </div>
+
+            <!-- Year-End Market Value Filters -->
+            <h3>Year-End Market Value (Millions)</h3>
+            <div class="market-value-container">
+                <label for="min-market-value">Min:</label>
+                <input type="number" id="min-market-value" placeholder="0" min="0">
+                <br>
+                <label for="max-market-value">Max:</label>
+                <input type="number" id="max-market-value" placeholder="1000" min="0">
+            </div>
+
+            <!-- Year-End Holders Filters -->
+            <h3>Year-End Holders</h3>
+            <div class="holders-container">
+                <label for="min-holders">Min:</label>
+                <input type="number" id="min-holders" placeholder="0" min="0">
+                <br>
+                <label for="max-holders">Max:</label>
+                <input type="number" id="max-holders" placeholder="10000" min="0">
+            </div>
+
+            <!-- Stock Symbol Filter -->
+            <h3>Stock Included</h3>
+            <div class="stock-filter-container">
+                <label for="stock-symbol-input">Stock Symbol:</label>
+                <input type="text" id="stock-symbol-input" placeholder="Enter stock symbol (e.g., AAPL)">
+            </div>
+
+            <!-- Lock In Search Button -->
+            <button onclick="lockInSearchManagers()">Lock In Search</button>
+            
+        </div>
 
         <!-- Password Form -->
         <div id="password-form" class="full-screen">
@@ -308,7 +516,6 @@
                 <h2>Welcome</h2>
                 <p>Select an option from the menu above to get started.</p>
             </div>
-
             
         </main>
     </div>

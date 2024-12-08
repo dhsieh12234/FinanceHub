@@ -1,4 +1,3 @@
-// Function to show the appropriate window and toggle sidebars
 function showWindow(entity) {
     console.log(`showWindow called for: ${entity}`); // Debugging
     const resultsContainer = document.getElementById('results_container');
@@ -25,19 +24,105 @@ function showWindow(entity) {
     // Toggle the sidebar visibility based on the selected entity
     const sidebarStocks = document.getElementById('left-sidebar-stocks');
     const sidebarCompanies = document.getElementById('left-sidebar-companies');
+    const sidebarBanks = document.getElementById('left-sidebar-banks');
+    const sidebarManagers = document.getElementById('left-sidebar-managers'); 
+    const sidebarPortfolios = document.getElementById('left-sidebar-portfolios'); // Add Portfolio Sidebar
 
+    // Hide all sidebars initially
+    sidebarStocks.classList.add('hidden');
+    sidebarCompanies.classList.add('hidden');
+    sidebarBanks.classList.add('hidden');
+    sidebarManagers.classList.add('hidden');
+    sidebarPortfolios.classList.add('hidden'); // Hide Portfolio Sidebar by default
+
+    // Show the relevant sidebar based on the selected entity
     if (entity === 'stocks') {
-        sidebarStocks.classList.remove('hidden'); // Show Stocks sidebar
-        sidebarCompanies.classList.add('hidden'); // Hide Companies sidebar
+        sidebarStocks.classList.remove('hidden');
     } else if (entity === 'companies') {
-        sidebarCompanies.classList.remove('hidden'); // Show Companies sidebar
-        sidebarStocks.classList.add('hidden'); // Hide Stocks sidebar
-    } else {
-        // Hide both sidebars for other entities
-        sidebarStocks.classList.add('hidden');
-        sidebarCompanies.classList.add('hidden');
+        sidebarCompanies.classList.remove('hidden');
+    } else if (entity === 'investment_banks') {
+        sidebarBanks.classList.remove('hidden');
+    } else if (entity === 'managers') {
+        sidebarManagers.classList.remove('hidden');
+    } else if (entity === 'portfolios') {
+        sidebarPortfolios.classList.remove('hidden'); // Show Portfolio Sidebar
     }
 }
+
+async function lockInSearchPortfolios() {
+    console.log("Lock In Search for Portfolios triggered");
+
+    // Collect selected display options
+    const selectedFields = updatePortfolioDisplayPreferences();
+
+    // Collect stock symbol
+    const stockSymbol = document.getElementById('stock-symbol-input')?.value.trim() || '';
+
+    // Collect min and max year-end market value (converted to millions)
+    const minMarketValue = (document.getElementById('min-market-value')?.value || 0) * 1_000_000;
+    const maxMarketValue = (document.getElementById('max-market-value')?.value || 1_000) * 1_000_000;
+
+    // Collect min and max year-end holders
+    const minHolders = document.getElementById('min-holders')?.value || 0;
+    const maxHolders = document.getElementById('max-holders')?.value || 1_000_000;
+
+    const resultsContainer = document.getElementById('results_container');
+    if (!resultsContainer) {
+        console.error('Results container not found.');
+        return;
+    }
+
+    // Display a loading message
+    resultsContainer.innerHTML = '<p>Loading results...</p>';
+
+    try {
+        // Build query parameters
+        const params = new URLSearchParams({
+            entity: 'portfolios',
+            display_fields: selectedFields.join(','), // Send selected fields as a comma-separated string
+            stock_symbol: stockSymbol,
+            min_market_value: minMarketValue,
+            max_market_value: maxMarketValue,
+            min_holders: minHolders,
+            max_holders: maxHolders,
+        });
+
+        console.log(`Query parameters for portfolios: ${params.toString()}`); // Debugging
+
+        // Fetch results from the backend
+        const response = await fetch(`/search?${params.toString()}`);
+        const data = await response.json();
+
+        // Check and display results
+        if (data.error) {
+            resultsContainer.innerHTML = `<p>Error: ${data.error}</p>`;
+        } else if (data.length === 0) {
+            resultsContainer.innerHTML = '<p>No results found for the specified criteria.</p>';
+        } else {
+            // Render the results dynamically based on selected fields
+            resultsContainer.innerHTML = data
+                .map((item) => {
+                    return `
+                        <div class="result-item">
+                            ${selectedFields.includes('portfolio_name') ? `<strong>Portfolio Name:</strong> ${item.portfolio_name || 'N/A'}<br>` : ''}
+                            ${selectedFields.includes('stock') ? `<strong>Stock:</strong> ${item.stock || 'N/A'}<br>` : ''}
+                            ${selectedFields.includes('foundation_date') ? `<strong>Foundation Date:</strong> ${item.foundation_date || 'N/A'}<br>` : ''}
+                            ${selectedFields.includes('manager') ? `<strong>Manager:</strong> ${item.manager || 'N/A'}<br>` : ''}
+                            ${selectedFields.includes('holders') ? `<strong>Number of Holders:</strong> ${item.holders || 'N/A'}<br>` : ''}
+                            ${selectedFields.includes('year_end_market_value') ? `<strong>Year-End Market Value:</strong> $${item.year_end_market_value || 'N/A'}<br>` : ''}
+                        </div>
+                        <hr>
+                    `;
+                })
+                .join('');
+        }
+    } catch (error) {
+        console.error("Error during search:", error); // Debugging
+        resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+    }
+}
+
+
 
 
 // Function to handle "Advanced Options"
@@ -422,6 +507,126 @@ async function lockInSearchCompanies() {
         resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
     }
 }
+
+// Function to lock in the selected filters and display results in the results_container for Banks
+async function lockInSearchBanks() {
+    console.log("Lock In Search for Banks triggered"); // Debugging
+
+    // Collect filter values
+    const nameInput = document.getElementById('bank-search-input')?.value.trim() || ''; // Bank name input
+    const locationInput = document.getElementById('location-dropdown')?.value || ''; // Selected location
+    const industryInput = document.getElementById('industry-dropdown')?.value || ''; // Selected industry
+
+    const resultsContainer = document.getElementById('results_container');
+    if (!resultsContainer) {
+        console.error('Results container not found.');
+        return;
+    }
+
+    resultsContainer.innerHTML = '<p>Loading results...</p>';
+
+    try {
+        // Build query parameters
+        const params = new URLSearchParams({
+            entity: 'investment_banks',
+            name: nameInput,
+            location: locationInput,
+            industry: industryInput,
+        });
+
+        console.log(`Query parameters for banks: ${params.toString()}`); // Debugging
+
+        // Fetch results
+        const response = await fetch(`/search?${params.toString()}`);
+        const data = await response.json();
+
+        // Check and display results
+        if (data.error) {
+            resultsContainer.innerHTML = `<p>Error: ${data.error}</p>`;
+        } else if (data.length === 0) {
+            resultsContainer.innerHTML = '<p>No results found for the specified criteria.</p>';
+        } else {
+            resultsContainer.innerHTML = data
+                .map(
+                    (item) =>
+                        `<div class="result-item">
+                            <strong>${item.name || 'N/A'}</strong><br>
+                            Location: ${item.location || 'N/A'}<br>
+                            Industry: ${item.industry || 'N/A'}<br>
+                            CEO Name: ${item.ceo_name || 'N/A'}
+                        </div>`
+                )
+                .join('');
+        }
+    } catch (error) {
+        console.error(error); // Debugging
+        resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+    }
+}
+
+// Function to lock in the selected filters and display results in the results_container for Managers
+async function lockInSearchManagers() {
+    console.log("Lock In Search for Managers triggered"); // Debugging
+
+    // Collect filter values
+    const nameInput = document.getElementById('manager-search-input')?.value.trim() || ''; // Manager name input
+    const selectedInvestmentFirm = document.getElementById('investment-firm-dropdown')?.value || ''; // Selected investment firm
+    const minYearsExperience = document.getElementById('min-years-experience')?.value || 0; // Min years of experience
+    const maxYearsExperience = document.getElementById('max-years-experience')?.value || 50; // Max years of experience
+
+    const resultsContainer = document.getElementById('results_container');
+    if (!resultsContainer) {
+        console.error('Results container not found.');
+        return;
+    }
+
+    // Display a loading message
+    resultsContainer.innerHTML = '<p>Loading results...</p>';
+
+    try {
+        // Build query parameters
+        const params = new URLSearchParams({
+            entity: 'managers',
+            name: nameInput,
+            investment_firm: selectedInvestmentFirm,
+            min_years_experience: minYearsExperience,
+            max_years_experience: maxYearsExperience,
+        });
+
+        console.log(`Query parameters for managers: ${params.toString()}`); // Debugging
+
+        // Fetch results from the backend
+        const response = await fetch(`/search?${params.toString()}`);
+        const data = await response.json();
+
+        // Check and display results
+        if (data.error) {
+            resultsContainer.innerHTML = `<p>Error: ${data.error}</p>`;
+        } else if (data.length === 0) {
+            resultsContainer.innerHTML = '<p>No results found for the specified criteria.</p>';
+        } else {
+            // Render the results dynamically
+            resultsContainer.innerHTML = data
+                .map(
+                    (item) =>
+                        `<div class="result-item">
+                            <strong>${item.first_name || ''} ${item.last_name || ''}</strong><br>
+                            Investment Firm: ${item.investment_firm_name || 'N/A'}<br>
+                            Years of Experience: ${item.years_experience || 'N/A'}<br>
+                            Field of Expertise: ${item.investment_expertise || 'N/A'}<br>
+                            Intro: ${item.personal_intro_text || 'N/A'}<br>
+                            Portfolio: ${item.portfolio || 'N/A'}<br>
+                            ID: ${item.certification_ID || 'N/A'}
+                        </div>`
+                )
+                .join('');
+        }
+    } catch (error) {
+        console.error("Error during search:", error); // Debugging
+        resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+    }
+}
+
 
 
 

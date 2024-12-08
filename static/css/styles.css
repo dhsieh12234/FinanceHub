@@ -176,5 +176,66 @@ body {
     border-radius: 8px; /* Slightly rounds the corners */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Adds a light shadow for depth */
     padding: 20px; /* Adds internal padding for spacing */
-    z-index: 1000; /* Ensures the sidebar appears above other elements */
 }
+
+/* Styling for the Investment Banks Sidebar */
+#left-sidebar-banks {
+    position: fixed;
+    top: 100px;
+    left: 0;
+    width: 300px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+/* Styling for sidebar headers */
+#left-sidebar-banks h3 {
+    margin-top: 0;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Styling for labels inside the Investment Banks Sidebar */
+#left-sidebar-banks label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    color: #555;
+}
+
+/* Styling for checkboxes inside the Investment Banks Sidebar */
+#left-sidebar-banks input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+/* Dropdown styling */
+#left-sidebar-banks select {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 5px;
+    font-size: 1em;
+}
+
+/* Lock In Search button styling */
+#left-sidebar-banks button {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    text-align: center;
+}
+
+#left-sidebar-banks button:hover {
+    background-color: #0056b3;
+}
+
