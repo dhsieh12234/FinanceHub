@@ -21,6 +21,7 @@ function showWindow(entity) {
     const sidebar = document.getElementById('left-sidebar');
     if (entity === 'stocks') {
         sidebar.classList.remove('hidden'); // Show sidebar
+        resultsContainer.innerHTML = '';
     } else {
         sidebar.classList.add('hidden'); // Hide sidebar
     }
@@ -214,73 +215,93 @@ function updatePriceRange() {
     const minPriceInput = document.getElementById('min_price');
     const maxPriceInput = document.getElementById('max_price');
     const priceRangeDisplay = document.getElementById('price-range-value');
+    const resultsContainer = document.getElementById('results_container');
 
-    const minPrice = minPriceInput.value ? parseFloat(minPriceInput.value) : 0;
-    const maxPrice = maxPriceInput.value ? parseFloat(maxPriceInput.value) : 1200;
+    // Parse input values
+    let minPrice = parseFloat(minPriceInput.value) || 0;
+    let maxPrice = parseFloat(maxPriceInput.value) || 1200;
 
-    // Ensure valid input: min price cannot exceed max price
+    // Check if max is lower than min
     if (minPrice > maxPrice) {
-        maxPriceInput.value = minPrice; // Adjust max to match min
+        // Report error in the results container
+        resultsContainer.innerHTML = '<p class="error-message">Error: Max price must be greater than or equal to min price.</p>';
+        priceRangeDisplay.textContent = `$${minPrice} - Invalid`;
+        return;
     }
 
-    // Update the displayed range
+    // Clear any previous error and update the displayed range
+    resultsContainer.innerHTML = ''; // Clear error messages
     priceRangeDisplay.textContent = `$${minPrice} - $${maxPrice}`;
 }
 
+
 // Function to update displayed year-end total number of shares range
 function updateValueRange() {
-    const minSharesInput = document.getElementById('min_shares');
-    const maxSharesInput = document.getElementById('max_shares');
-    const sharesRangeDisplay = document.getElementById('shares-range-value');
+    const minValueInput = document.getElementById('min_market_value');
+    const maxValueInput = document.getElementById('max_market_value');
+    const marketValueRangeDisplay = document.getElementById('market-value-range-value');
+    const resultsContainer = document.getElementById('results_container');
 
-    const minShares = minSharesInput.value ? parseFloat(minSharesInput.value) : 0;
-    const maxShares = maxSharesInput.value ? parseFloat(maxSharesInput.value) : 4000;
+    // Parse input values
+    let minValue = parseFloat(minValueInput.value) || 0;
+    let maxValue = parseFloat(maxValueInput.value) || 1000;
 
-    // Ensure valid input: min shares cannot exceed max shares
-    if (minShares > maxShares) {
-        maxSharesInput.value = minShares; // Adjust max to match min
+    // Check if max is lower than min
+    if (minValue > maxValue) {
+        // Report error in the results container
+        resultsContainer.innerHTML = '<p class="error-message">Error: Max market value must be greater than or equal to min market value.</p>';
+        marketValueRangeDisplay.textContent = `$${minValue}B - Invalid`;
+        return;
     }
 
-    // Update the displayed range
-    sharesRangeDisplay.textContent = `${minShares} - ${maxShares} shares`;
+    // Clear any previous error and update the displayed range
+    resultsContainer.innerHTML = ''; // Clear error messages
+    marketValueRangeDisplay.textContent = `$${minValue}B - $${maxValue}B`;
 }
+
 
 // Function to update displayed year-end total number of shares range
 function updateSharesRange() {
     const minSharesInput = document.getElementById('min_shares');
     const maxSharesInput = document.getElementById('max_shares');
     const sharesRangeDisplay = document.getElementById('shares-range-value');
+    const resultsContainer = document.getElementById('results_container');
 
-    const minShares = minSharesInput.value ? parseFloat(minSharesInput.value) : 100;
-    const maxShares = maxSharesInput.value ? parseFloat(maxSharesInput.value) : 15000;
+    // Parse input values
+    let minShares = parseFloat(minSharesInput.value) || 100;
+    let maxShares = parseFloat(maxSharesInput.value) || 15000;
 
-    // Ensure valid input: min shares cannot exceed max shares
+    // Check if max is lower than min
     if (minShares > maxShares) {
-        maxSharesInput.value = minShares; // Adjust max to match min
+        // Report error in the results container
+        resultsContainer.innerHTML = '<p class="error-message">Error: Max shares must be greater than or equal to min shares.</p>';
+        sharesRangeDisplay.textContent = `${minShares}M - Invalid`;
+        return;
     }
 
-    // Update the displayed range
-    sharesRangeDisplay.textContent = `${minShares} - ${maxShares} shares`;
+    // Clear any previous error and update the displayed range
+    resultsContainer.innerHTML = ''; // Clear error messages
+    sharesRangeDisplay.textContent = `${minShares}M - ${maxShares}M`;
 }
+
+
+
 
 // Function to lock in the selected filters and display results in the results_container
 async function lockInSearch() {
-    console.log("Lock In Search triggered");
+    console.log("Lock In Search triggered"); // Debugging
 
     // Collect filter values
     const nameInput = document.getElementById('stock-search-input')?.value.trim() || ''; // Stock name input
     const minPrice = document.getElementById('min_price')?.value || 0;
     const maxPrice = document.getElementById('max_price')?.value || 1200;
 
-    // Convert Market Value (Billions) to actual values
-    const minMarketValue = (document.getElementById('min_market_value')?.value || 0) * 1_000_000_000; // Convert billions to actual value
-    const maxMarketValue = (document.getElementById('max_market_value')?.value || 1000) * 1_000_000_000; // Convert billions to actual value
+    const minMarketValue = (document.getElementById('min_market_value')?.value || 0) * 1_000_000_000; // Convert billions
+    const maxMarketValue = (document.getElementById('max_market_value')?.value || 1000) * 1_000_000_000; // Convert billions
 
-    // Convert Total Number of Shares (Millions) to actual values
-    const minShares = (document.getElementById('min_shares')?.value || 100) * 1_000_000; // Convert millions to actual value
-    const maxShares = (document.getElementById('max_shares')?.value || 15_000) * 1_000_000; // Convert millions to actual value
+    const minShares = (document.getElementById('min_shares')?.value || 100) * 1_000_000; // Convert millions
+    const maxShares = (document.getElementById('max_shares')?.value || 15_000) * 1_000_000; // Convert millions
 
-    // Update the results container with a loading message
     const resultsContainer = document.getElementById('results_container');
     if (!resultsContainer) {
         console.error('Results container not found.');
@@ -290,7 +311,7 @@ async function lockInSearch() {
     resultsContainer.innerHTML = '<p>Loading results...</p>';
 
     try {
-        // Build query string with filter parameters
+        // Build query parameters
         const params = new URLSearchParams({
             entity: 'stocks',
             name: nameInput,
@@ -302,17 +323,18 @@ async function lockInSearch() {
             max_shares: maxShares,
         });
 
-        // Call the backend API
+        console.log(`Query parameters: ${params.toString()}`); // Debugging
+
+        // Fetch results
         const response = await fetch(`/search?${params.toString()}`);
         const data = await response.json();
 
-        // Handle errors or empty results
+        // Check and display results
         if (data.error) {
             resultsContainer.innerHTML = `<p>Error: ${data.error}</p>`;
         } else if (data.length === 0) {
             resultsContainer.innerHTML = '<p>No results found for the specified criteria.</p>';
         } else {
-            // Display the results dynamically
             resultsContainer.innerHTML = data
                 .map(
                     (item) =>
@@ -326,6 +348,7 @@ async function lockInSearch() {
                 .join('');
         }
     } catch (error) {
+        console.error(error); // Debugging
         resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
     }
 }

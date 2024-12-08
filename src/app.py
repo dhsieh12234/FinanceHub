@@ -36,35 +36,95 @@ def submit_password():
 @app.route('/search', methods=['GET'])
 def search():
     entity = request.args.get('entity')
-    name = request.args.get('name')
-    firstname = request.args.get('firstname') == 'true'  # Convert to boolean
-    lastname = request.args.get('lastname') == 'true'    # Convert to boolean
-
-    if not writer_instance:
-        return jsonify({"error": "Database not initialized. Please submit the password first."})
+    name = request.args.get('name', '')
+    min_price = request.args.get('min_price', None)
+    max_price = request.args.get('max_price', None)
+    min_market_value = request.args.get('min_market_value', None)
+    max_market_value = request.args.get('max_market_value', None)
+    min_shares = request.args.get('min_shares', None)
+    max_shares = request.args.get('max_shares', None)
 
     try:
         connection = writer_instance.connect_to_database()
         cursor = connection.cursor(dictionary=True)
-        # Query the database
-        if entity == 'managers':
-            if firstname:
-                query = f"SELECT * FROM managers WHERE first_name LIKE %s"
-            if lastname:
-                query = f"SELECT * FROM managers WHERE last_name LIKE %s"
+
+        # Entity-specific query handling
+        if entity == 'stocks':
+            if (
+                not min_price and not max_price and
+                not min_market_value and not max_market_value and
+                not min_shares and not max_shares
+            ):
+                # Simple name-based query when only 'name' is provided
+                query = """
+                    SELECT * FROM stocks
+                    WHERE name LIKE %s
+                """
+                params = (f"%{name}%",)
+            else:
+                # Full query with filters
+                query = """
+                    SELECT * FROM stocks
+                    WHERE
+                        name LIKE %s
+                        AND year_end_price BETWEEN %s AND %s
+                        AND year_end_market_value BETWEEN %s AND %s
+                        AND year_end_shares BETWEEN %s AND %s
+                """
+                params = (
+                    f"%{name}%",
+                    float(min_price or 0), float(max_price or float('inf')),
+                    float(min_market_value or 0), float(max_market_value or float('inf')),
+                    float(min_shares or 0), float(max_shares or float('inf')),
+                )
+        elif entity == 'companies':
+            query = """
+                SELECT * FROM companies
+                WHERE name LIKE %s
+            """
+            params = (f"%{name}%",)
+        elif entity == 'managers':
+            query = """
+                SELECT * FROM managers
+                WHERE first_name LIKE %s OR last_name LIKE %s
+            """
+            params = (f"%{name}%", f"%{name}%")
+        elif entity == 'investment_banks':
+            query = """
+                SELECT * FROM investment_banks
+                WHERE name LIKE %s
+            """
+            params = (f"%{name}%",)
+        elif entity == 'investment_firms':
+            query = """
+                SELECT * FROM investment_firms
+                WHERE name LIKE %s
+            """
+            params = (f"%{name}%",)
+        elif entity == 'portfolios':
+            query = """
+                SELECT * FROM portfolios
+                WHERE name LIKE %s
+            """
+            params = (f"%{name}%",)
         else:
-            query = f"SELECT * FROM {entity} WHERE name LIKE %s"
-        cursor.execute(query, (f"%{name}%",))
+            return jsonify({"error": f"Unsupported entity type: {entity}"}), 400
+
+        # Execute the query
+        print(f"Executing query: {query} with params: {params}")  # Debugging
+        cursor.execute(query, params)
         results = cursor.fetchall()
 
         return jsonify(results)
     except mysql.connector.Error as error:
-        return jsonify({"error": str(error)})
+        return jsonify({"error": str(error)}), 500
     finally:
         if cursor:
             cursor.close()
         if connection:
             connection.close()
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

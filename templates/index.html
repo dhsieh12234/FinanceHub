@@ -36,54 +36,89 @@
     <div class="container">
         <!-- Left Sidebar (Initially Hidden) -->
         <div id="left-sidebar" class="left-sidebar hidden">
-            <h3>Display Options</h3>
-            <label>
-                <input type="radio" name="display_option" value="name" onchange="updateDisplayPreference('name')">
-                Show Name
-            </label>
-            <br>
-            <label>
-                <input type="radio" name="display_option" value="symbol" checked onchange="updateDisplayPreference('symbol')">
-                Show Symbol
-            </label>
-
-            <h3>Price Range</h3>
-            <!-- Price Range Section -->
-            <div class="price-range-inputs">
-                <label for="min_price">Min Price: </label>
-                <input type="number" id="min_price" placeholder="0" oninput="updatePriceRange()" min="0" step="1">
+            <h3>Stock Filters</h3>
+            <form id="stocks-filter-form">
+                <!-- Stock Name -->
+                <h4>Stock Name</h4>
+                <input 
+                    type="text" 
+                    id="stock-search-input" 
+                    placeholder="Enter stock name or symbol">
+        
+                <!-- Price Range -->
+                <h4>Price Range</h4>
+                <label for="min_price">Min Price:</label>
+                <input 
+                    type="number" 
+                    id="min_price" 
+                    placeholder="0" 
+                    min="0" 
+                    step="1" 
+                    oninput="updatePriceRange()">
                 <br>
-                <label for="max_price">Max Price: </label>
-                <input type="number" id="max_price" placeholder="1200" oninput="updatePriceRange()" min="0" step="1">
+                <label for="max_price">Max Price:</label>
+                <input 
+                    type="number" 
+                    id="max_price" 
+                    placeholder="1200" 
+                    min="0" 
+                    step="1" 
+                    oninput="updatePriceRange()">
                 <br>
                 <span id="price-range-value">$0 - $1200</span>
-            </div>
-
-            <h3>Total Market Value(Billions)</h3>
-            <div class="shares-range-inputs">
-                <label for="min_shares">Min Value: </label>
-                <input type="number" id="min_shares" placeholder="0" oninput="updateValueRange()" min="0" step="1">
+        
+                <!-- Total Market Value -->
+                <h4>Total Market Value (Billions)</h4>
+                <label for="min_market_value">Min Value:</label>
+                <input 
+                    type="number" 
+                    id="min_market_value" 
+                    placeholder="0" 
+                    min="0" 
+                    step="1" 
+                    oninput="updateValueRange()">
                 <br>
-                <label for="max_shares">Max Value: </label>
-                <input type="number" id="max_shares" placeholder="4000" oninput="updateValueRange()" min="0" step="1">
+                <label for="max_market_value">Max Value:</label>
+                <input 
+                    type="number" 
+                    id="max_market_value" 
+                    placeholder="1000" 
+                    min="0" 
+                    step="1" 
+                    oninput="updateValueRange()">
                 <br>
-                <span id="shares-range-value">0 - 4000 shares</span>
-            </div>
-
-            <h3>Total Number of Shares(Millions)</h3>
-            <div class="shares-range-inputs">
-                <label for="min_shares">Min Shares: </label>
-                <input type="number" id="min_shares" placeholder="100" oninput="updateSharesRange()" min="100" step="1">
+                <span id="market-value-range-value">$0 - $1000B</span>
+        
+                <!-- Total Number of Shares -->
+                <h4>Total Number of Shares (Millions)</h4>
+                <label for="min_shares">Min Shares:</label>
+                <input 
+                    type="number" 
+                    id="min_shares" 
+                    placeholder="100" 
+                    min="100" 
+                    step="1" 
+                    oninput="updateSharesRange()">
                 <br>
-                <label for="max_shares">Max Shares: </label>
-                <input type="number" id="max_shares" placeholder="15000" oninput="updateSharesRange()" min="100" step="1">
+                <label for="max_shares">Max Shares:</label>
+                <input 
+                    type="number" 
+                    id="max_shares" 
+                    placeholder="15000" 
+                    min="100" 
+                    step="1" 
+                    oninput="updateSharesRange()">
                 <br>
-                <span id="shares-range-value">100 - 15000 shares</span>
-            </div>
-
-            <button id="lock-in-button" onclick="lockInSearch()">Search</button>
-
+                <span id="shares-range-value">100M - 15,000M</span>
+        
+                <!-- Search Button -->
+                <button 
+                    type="button" 
+                    id="lock-in-button" 
+                    onclick="lockInSearch()">Search</button>
+            </form>
         </div>
+        
 
         <!-- Password Form -->
         <div id="password-form" class="full-screen">
