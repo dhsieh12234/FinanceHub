@@ -46,82 +46,20 @@ def search():
     try:
         connection = writer_instance.connect_to_database()
         cursor = connection.cursor(dictionary=True)
-
-        # Initialize query and params
-        query = None
-        params = []
-
-        # Build the query dynamically
+        # Query the database
         if entity == 'managers':
-            conditions = []
             if firstname:
-                conditions.append("first_name LIKE %s")
-                params.append(f"%{name}%")
+                query = f"SELECT * FROM managers WHERE first_name LIKE %s"
             if lastname:
-                conditions.append("last_name LIKE %s")
-                params.append(f"%{name}%")
-
-            if conditions:  # Ensure there are conditions before constructing the query
-                query = f"SELECT * FROM managers WHERE {' OR '.join(conditions)}"
-            else:
-                return jsonify({"error": "No valid search criteria provided for managers."}), 400
+                query = f"SELECT * FROM managers WHERE last_name LIKE %s"
         else:
-            # Generic query for other entities
             query = f"SELECT * FROM {entity} WHERE name LIKE %s"
-            params = [f"%{name}%"]
-
-        # Ensure query is assigned before execution
-        if not query:
-            return jsonify({"error": "Failed to construct a valid query."}), 400
-
-        # Execute the query
-        cursor.execute(query, params)
+        cursor.execute(query, (f"%{name}%",))
         results = cursor.fetchall()
 
         return jsonify(results)
     except mysql.connector.Error as error:
-        return jsonify({"error": str(error)}), 500
-    finally:
-        if cursor:
-            cursor.close()
-        if connection:
-            connection.close()
-
-@app.route('/stocks/search', methods=['GET'])
-def search_stocks():
-    min_price = request.args.get('min_price', type=float)  # Convert to float
-    max_price = request.args.get('max_price', type=float)  # Convert to float
-
-    if not writer_instance:
-        return jsonify({"error": "Database not initialized. Please submit the password first."}), 400
-
-    try:
-        connection = writer_instance.connect_to_database()
-        cursor = connection.cursor(dictionary=True)
-
-        # Build the query dynamically
-        conditions = []
-        params = []
-        if min_price is not None:
-            conditions.append("year_end_price >= %s")
-            params.append(min_price)
-        if max_price is not None:
-            conditions.append("year_end_price <= %s")
-            params.append(max_price)
-
-        if not conditions:
-            return jsonify({"error": "Please provide at least one condition."}), 400
-
-        query = f"SELECT * FROM stocks WHERE {' AND '.join(conditions)}"
-        print(f"Executing query: {query} with params: {params}")  # Debugging
-
-        cursor.execute(query, params)
-        results = cursor.fetchall()
-
-        return jsonify(results)
-    except mysql.connector.Error as error:
-        print(f"Database error: {error}")
-        return jsonify({"error": str(error)}), 500
+        return jsonify({"error": str(error)})
     finally:
         if cursor:
             cursor.close()

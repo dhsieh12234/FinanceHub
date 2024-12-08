@@ -132,3 +132,10 @@ body {
 .webpage-mark:hover {
     background-color: rgba(0, 0, 0, 0.9);
 }
+
+/* Shift the entire sidebar content to the right and down */
+#left-sidebar {
+    margin-left: 20px; /* Move the sidebar to the right */
+    margin-top: 30px; /* Move the sidebar down */
+    padding-left: 10px; /* Optional: Add padding for inner spacing */
+}
