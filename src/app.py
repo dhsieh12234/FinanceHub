@@ -43,6 +43,8 @@ def search():
     max_market_value = request.args.get('max_market_value', None)
     min_shares = request.args.get('min_shares', None)
     max_shares = request.args.get('max_shares', None)
+    location = request.args.get('location', '')
+    industry = request.args.get('industry', '')
 
     try:
         connection = writer_instance.connect_to_database()
@@ -78,11 +80,34 @@ def search():
                     float(min_shares or 0), float(max_shares or float('inf')),
                 )
         elif entity == 'companies':
-            query = """
-                SELECT * FROM companies
-                WHERE name LIKE %s
-            """
-            params = (f"%{name}%",)
+            if entity == 'companies':
+                if not location and not industry and not name:
+                    # Simple query when no filters are provided
+                    query = """
+                        SELECT * FROM companies
+                    """
+                    params = ()
+                elif not location and not industry:
+                    # Simple name-based query when only 'name' is provided
+                    query = """
+                        SELECT * FROM companies
+                        WHERE name LIKE %s
+                    """
+                    params = (f"%{name}%",)
+                else:
+                    # Full query with filters
+                    query = """
+                        SELECT * FROM companies
+                        WHERE
+                            name LIKE %s
+                            AND (location LIKE %s OR %s = '')
+                            AND (industry LIKE %s OR %s = '')
+                    """
+                    params = (
+                        f"%{name}%",
+                        f"%{location}%", location or '',
+                        f"%{industry}%", industry or '',
+                    )
         elif entity == 'managers':
             query = """
                 SELECT * FROM managers

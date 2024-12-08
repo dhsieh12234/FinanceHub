@@ -145,3 +145,36 @@ body {
     margin-top: 30px; /* Move the sidebar down */
     padding-left: 10px; /* Optional: Add padding for inner spacing */
 }
+
+/* Industry Dropdown Styling */
+.industry-dropdown {
+    margin-left: 10px; /* Align with other inputs */
+    margin-top: 10px;
+}
+
+.industry-dropdown label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.industry-dropdown select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Styling for the Companies Sidebar */
+#left-sidebar-companies {
+    position: fixed; /* Ensures the sidebar stays fixed while scrolling */
+    top: 100px; /* Adjusts the distance from the top */
+    left: 0; /* Aligns the sidebar to the left of the viewport */
+    width: 300px; /* Defines the width of the sidebar */
+    background-color: #f9f9f9; /* Light background color for contrast */
+    border: 1px solid #ddd; /* Adds a subtle border */
+    border-radius: 8px; /* Slightly rounds the corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Adds a light shadow for depth */
+    padding: 20px; /* Adds internal padding for spacing */
+    z-index: 1000; /* Ensures the sidebar appears above other elements */
+}

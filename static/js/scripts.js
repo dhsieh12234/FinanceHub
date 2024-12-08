@@ -1,4 +1,4 @@
-// Function to show the appropriate window
+// Function to show the appropriate window and toggle sidebars
 function showWindow(entity) {
     console.log(`showWindow called for: ${entity}`); // Debugging
     const resultsContainer = document.getElementById('results_container');
@@ -9,23 +9,36 @@ function showWindow(entity) {
         return;
     }
 
-    // Dynamically create the search interface for the selected entity
-    resultsContainer.innerHTML = `
-        <h2>Search ${capitalizeFirstLetter(entity)}</h2>
-        <input type="text" id="search_${entity}" placeholder="Enter ${entity.replace('_', ' ')} name to search">
-        <button onclick="search('${entity}')">Search</button>
-        <div id="results_${entity}" class="results"></div>
-    `;
+    // Hide all specific tab contents
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(tab => tab.classList.add('hidden'));
+
+    // Show the selected tab content
+    const selectedTab = document.getElementById(`${entity}-tab`);
+    if (selectedTab) {
+        selectedTab.classList.remove('hidden');
+    }
+
+    // Clear the results container
+    resultsContainer.innerHTML = '';
 
     // Toggle the sidebar visibility based on the selected entity
-    const sidebar = document.getElementById('left-sidebar');
+    const sidebarStocks = document.getElementById('left-sidebar-stocks');
+    const sidebarCompanies = document.getElementById('left-sidebar-companies');
+
     if (entity === 'stocks') {
-        sidebar.classList.remove('hidden'); // Show sidebar
-        resultsContainer.innerHTML = '';
+        sidebarStocks.classList.remove('hidden'); // Show Stocks sidebar
+        sidebarCompanies.classList.add('hidden'); // Hide Companies sidebar
+    } else if (entity === 'companies') {
+        sidebarCompanies.classList.remove('hidden'); // Show Companies sidebar
+        sidebarStocks.classList.add('hidden'); // Hide Stocks sidebar
     } else {
-        sidebar.classList.add('hidden'); // Hide sidebar
+        // Hide both sidebars for other entities
+        sidebarStocks.classList.add('hidden');
+        sidebarCompanies.classList.add('hidden');
     }
 }
+
 
 // Function to handle "Advanced Options"
 function showAdvancedQuery(type) {
@@ -288,7 +301,7 @@ function updateSharesRange() {
 
 
 // Function to lock in the selected filters and display results in the results_container
-async function lockInSearch() {
+async function lockInSearchStocks() {
     console.log("Lock In Search triggered"); // Debugging
 
     // Collect filter values
@@ -352,6 +365,64 @@ async function lockInSearch() {
         resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
     }
 }
+
+// Function to lock in the selected filters and display results in the results_container for Companies
+async function lockInSearchCompanies() {
+    console.log("Lock In Search for Companies triggered"); // Debugging
+
+    // Collect filter values
+    const nameInput = document.getElementById('company-search-input')?.value.trim() || ''; // Company name input
+    const industryInput = document.getElementById('company_industry')?.value || ''; // Selected industry
+    const cityInput = document.getElementById('company_city')?.value || ''; // Selected city
+
+    const resultsContainer = document.getElementById('results_container');
+    if (!resultsContainer) {
+        console.error('Results container not found.');
+        return;
+    }
+
+    resultsContainer.innerHTML = '<p>Loading results...</p>';
+
+    try {
+        // Build query parameters
+        const params = new URLSearchParams({
+            entity: 'companies',
+            name: nameInput,
+            industry: industryInput,
+            city: cityInput,
+        });
+
+        console.log(`Query parameters for companies: ${params.toString()}`); // Debugging
+
+        // Fetch results
+        const response = await fetch(`/search?${params.toString()}`);
+        const data = await response.json();
+
+        // Check and display results
+        if (data.error) {
+            resultsContainer.innerHTML = `<p>Error: ${data.error}</p>`;
+        } else if (data.length === 0) {
+            resultsContainer.innerHTML = '<p>No results found for the specified criteria.</p>';
+        } else {
+            resultsContainer.innerHTML = data
+                .map(
+                    (item) =>
+                        `<div class="result-item">
+                            <strong>${item.name || 'N/A'}</strong><br>
+                            Industry: ${item.industry || 'N/A'}<br>
+                            City: ${item.city || 'N/A'}<br>
+                            CEO Name: ${item.ceo_name || 'N/A'}<br>
+                            Company Info: ${item.company_info || 'N/A'}
+                        </div>`
+                )
+                .join('');
+        }
+    } catch (error) {
+        console.error(error); // Debugging
+        resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+    }
+}
+
 
 
 

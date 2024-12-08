@@ -35,7 +35,7 @@
 
     <div class="container">
         <!-- Left Sidebar (Initially Hidden) -->
-        <div id="left-sidebar" class="left-sidebar hidden">
+        <div id="left-sidebar-stocks" class="left-sidebar-stocks hidden">
             <h3>Stock Filters</h3>
             <form id="stocks-filter-form">
                 <!-- Stock Name -->
@@ -115,8 +115,172 @@
                 <button 
                     type="button" 
                     id="lock-in-button" 
-                    onclick="lockInSearch()">Search</button>
+                    onclick="lockInSearchStocks()">Search</button>
             </form>
+        </div>
+
+        <!-- Left Sidebar for Companies (Initially Hidden) -->
+        <div id="left-sidebar-companies" class="left-sidebar hidden">
+            <h3>Company Filters</h3>
+
+            <!-- Display Options -->
+            <h3>Display Options</h3>
+            <div class="display-options">
+                <label>
+                    <input type="checkbox" name="company_display_option" value="name" onchange="updateCompanyDisplayPreferences()">
+                    Show Name
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="company_display_option" value="symbol" onchange="updateCompanyDisplayPreferences()">
+                    Show Symbol
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="company_display_option" value="location" onchange="updateCompanyDisplayPreferences()">
+                    Show Location
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="company_display_option" value="ceo_name" onchange="updateCompanyDisplayPreferences()">
+                    Show CEO Name
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="company_display_option" value="industry" onchange="updateCompanyDisplayPreferences()">
+                    Show Industry
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="company_display_option" value="company_info" onchange="updateCompanyDisplayPreferences()">
+                    Show Company Info
+                </label>
+            </div>
+            
+                <!-- Industry Dropdown -->
+            <h3>Industry</h3>
+            <div class="industry-dropdown">
+                <label for="company_industry">Select Industry:</label>
+                <select id="company_industry">
+                    <option value="">-- Select Industry --</option>
+                    <option value="Consumer Electronics">Consumer Electronics</option>
+                    <option value="Software - Infrastructure">Software - Infrastructure</option>
+                    <option value="Internet Content & Information">Internet Content & Information</option>
+                    <option value="Internet Retail">Internet Retail</option>
+                    <option value="Semiconductors">Semiconductors</option>
+                    <option value="Auto Manufacturers">Auto Manufacturers</option>
+                    <option value="Communication Equipment">Communication Equipment</option>
+                    <option value="Software - Application">Software - Application</option>
+                    <option value="Information Technology Services">Information Technology Services</option>
+                    <option value="Semiconductor Equipment & Materials">Semiconductor Equipment & Materials</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Banks - Diversified">Banks - Diversified</option>
+                    <option value="Capital Markets">Capital Markets</option>
+                    <option value="Asset Management">Asset Management</option>
+                    <option value="Financial Data & Stock Exchanges">Financial Data & Stock Exchanges</option>
+                    <option value="Credit Services">Credit Services</option>
+                    <option value="Banks - Regional">Banks - Regional</option>
+                    <option value="Drug Manufacturers - General">Drug Manufacturers - General</option>
+                    <option value="Healthcare Plans">Healthcare Plans</option>
+                    <option value="Medical Devices">Medical Devices</option>
+                    <option value="Diagnostics & Research">Diagnostics & Research</option>
+                    <option value="Discount Stores">Discount Stores</option>
+                    <option value="Household & Personal Products">Household & Personal Products</option>
+                    <option value="Beverages - Non-Alcoholic">Beverages - Non-Alcoholic</option>
+                    <option value="Restaurants">Restaurants</option>
+                    <option value="Footwear & Accessories">Footwear & Accessories</option>
+                    <option value="Home Improvement Retail">Home Improvement Retail</option>
+                    <option value="Farm & Heavy Construction Machinery">Farm & Heavy Construction Machinery</option>
+                    <option value="Aerospace & Defense">Aerospace & Defense</option>
+                    <option value="Conglomerates">Conglomerates</option>
+                    <option value="Integrated Freight & Logistics">Integrated Freight & Logistics</option>
+                    <option value="Oil & Gas Integrated">Oil & Gas Integrated</option>
+                    <option value="Oil & Gas E&P">Oil & Gas E&P</option>
+                    <option value="Oil & Gas Equipment & Services">Oil & Gas Equipment & Services</option>
+                    <option value="Oil & Gas Refining & Marketing">Oil & Gas Refining & Marketing</option>
+                    <option value="Telecom Services">Telecom Services</option>
+                    <option value="Specialty Chemicals">Specialty Chemicals</option>
+                    <option value="Gold">Gold</option>
+                    <option value="Copper">Copper</option>
+                    <option value="REIT - Retail">REIT - Retail</option>
+                    <option value="REIT - Healthcare Facilities">REIT - Healthcare Facilities</option>
+                    <option value="REIT - Industrial">REIT - Industrial</option>
+                    <option value="REIT - Residential">REIT - Residential</option>
+                    <option value="Utilities - Regulated Electric">Utilities - Regulated Electric</option>
+                </select>
+            </div>
+
+             <!-- City Dropdown -->
+            <h3>City</h3>
+            <div class="city-dropdown">
+                <label for="company_city">Select City:</label>
+                <select id="company_city">
+                    <option value="">-- Select City --</option>
+                    <option value="Cupertino, United States">Cupertino, United States</option>
+                    <option value="Redmond, United States">Redmond, United States</option>
+                    <option value="Mountain View, United States">Mountain View, United States</option>
+                    <option value="Seattle, United States">Seattle, United States</option>
+                    <option value="Menlo Park, United States">Menlo Park, United States</option>
+                    <option value="Santa Clara, United States">Santa Clara, United States</option>
+                    <option value="Austin, United States">Austin, United States</option>
+                    <option value="San Jose, United States">San Jose, United States</option>
+                    <option value="San Francisco, United States">San Francisco, United States</option>
+                    <option value="San Diego, United States">San Diego, United States</option>
+                    <option value="Armonk, United States">Armonk, United States</option>
+                    <option value="Dallas, United States">Dallas, United States</option>
+                    <option value="Boise, United States">Boise, United States</option>
+                    <option value="Wilmington, United States">Wilmington, United States</option>
+                    <option value="Los Gatos, United States">Los Gatos, United States</option>
+                    <option value="New York, United States">New York, United States</option>
+                    <option value="Charlotte, United States">Charlotte, United States</option>
+                    <option value="Pittsburgh, United States">Pittsburgh, United States</option>
+                    <option value="New Brunswick, United States">New Brunswick, United States</option>
+                    <option value="Minnetonka, United States">Minnetonka, United States</option>
+                    <option value="North Chicago, United States">North Chicago, United States</option>
+                    <option value="Waltham, United States">Waltham, United States</option>
+                    <option value="Rahway, United States">Rahway, United States</option>
+                    <option value="Washington, United States">Washington, United States</option>
+                    <option value="Princeton, United States">Princeton, United States</option>
+                    <option value="Indianapolis, United States">Indianapolis, United States</option>
+                    <option value="Bentonville, United States">Bentonville, United States</option>
+                    <option value="Cincinnati, United States">Cincinnati, United States</option>
+                    <option value="Atlanta, United States">Atlanta, United States</option>
+                    <option value="Purchase, United States">Purchase, United States</option>
+                    <option value="Issaquah, United States">Issaquah, United States</option>
+                    <option value="Chicago, United States">Chicago, United States</option>
+                    <option value="Beaverton, United States">Beaverton, United States</option>
+                    <option value="Burbank, United States">Burbank, United States</option>
+                    <option value="Irving, United States">Irving, United States</option>
+                    <option value="Arlington, United States">Arlington, United States</option>
+                    <option value="Evendale, United States">Evendale, United States</option>
+                    <option value="Saint Paul, United States">Saint Paul, United States</option>
+                    <option value="Bethesda, United States">Bethesda, United States</option>
+                    <option value="Moline, United States">Moline, United States</option>
+                    <option value="Memphis, United States">Memphis, United States</option>
+                    <option value="Spring, United States">Spring, United States</option>
+                    <option value="San Ramon, United States">San Ramon, United States</option>
+                    <option value="Houston, United States">Houston, United States</option>
+                    <option value="Findlay, United States">Findlay, United States</option>
+                    <option value="San Antonio, United States">San Antonio, United States</option>
+                    <option value="Bellevue, United States">Bellevue, United States</option>
+                    <option value="Philadelphia, United States">Philadelphia, United States</option>
+                    <option value="Woking, United Kingdom">Woking, United Kingdom</option>
+                    <option value="Allentown, United States">Allentown, United States</option>
+                    <option value="Denver, United States">Denver, United States</option>
+                    <option value="Phoenix, United States">Phoenix, United States</option>
+                    <option value="Toledo, United States">Toledo, United States</option>
+                    <option value="Glendale, United States">Glendale, United States</option>
+                    <option value="Juno Beach, United States">Juno Beach, United States</option>
+                    <option value="Richmond, United States">Richmond, United States</option>
+                    <option value="Columbus, United States">Columbus, United States</option>
+                </select>
+            </div>
+
+            <!-- Lock In Button for Companies -->
+            <button 
+                    type="button" 
+                    id="lock-in-button" 
+                    onclick="lockInSearchCompanies()">Search</button>
         </div>
         
 
