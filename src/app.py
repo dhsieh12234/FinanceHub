@@ -54,7 +54,7 @@ def search():
 
     try:
         connection = writer_instance.connect_to_database()
-        cursor = connection.cursor(dictionary=True)
+        cursor = connection.cursor(buffered=True, dictionary=True)
 
         # Entity-specific query handling
         if entity == 'stocks':
