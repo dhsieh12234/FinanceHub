@@ -391,14 +391,15 @@ async function lockInSearchStocks() {
 
     // Collect filter values
     const nameInput = document.getElementById('stock-search-input')?.value.trim() || ''; // Stock name input
+
     const minPrice = document.getElementById('min_price')?.value || 0;
     const maxPrice = document.getElementById('max_price')?.value || 1200;
 
     const minMarketValue = (document.getElementById('min_market_value')?.value || 0) * 1_000_000_000; // Convert billions
-    const maxMarketValue = (document.getElementById('max_market_value')?.value || 1000) * 1_000_000_000; // Convert billions
+    const maxMarketValue = (document.getElementById('max_market_value')?.value || 5000) * 1_000_000_000; // Convert billions
 
     const minShares = (document.getElementById('min_shares')?.value || 100) * 1_000_000; // Convert millions
-    const maxShares = (document.getElementById('max_shares')?.value || 15_000) * 1_000_000; // Convert millions
+    const maxShares = (document.getElementById('max_shares')?.value || 16_000) * 1_000_000; // Convert millions
 
     // Collect selected display options
     const selectedDisplayOptions = Array.from(
@@ -656,7 +657,6 @@ async function lockInSearchBanks() {
 }
 
 
-// Function to lock in the selected filters and display results in the results_container for Managers
 async function lockInSearchManagers() {
     console.log("Lock In Search for Managers triggered"); // Debugging
 
@@ -670,6 +670,11 @@ async function lockInSearchManagers() {
     const selectedDisplayFields = Array.from(
         document.querySelectorAll('input[name="manager_display_option"]:checked')
     ).map((option) => option.value);
+
+    // Ensure default display options if none are selected
+    if (selectedDisplayFields.length === 0) {
+        selectedDisplayFields.push('name', 'investment_firm', 'years_experience', 'personal_intro_text', 'portfolio', 'id');
+    }
 
     const resultsContainer = document.getElementById('results_container');
     if (!resultsContainer) {
@@ -695,6 +700,9 @@ async function lockInSearchManagers() {
 
         // Fetch results from the backend
         const response = await fetch(`/search?${params.toString()}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
         const data = await response.json();
 
         // Check and display results
@@ -708,25 +716,22 @@ async function lockInSearchManagers() {
                 .map((item) => {
                     let result = '';
                     if (selectedDisplayFields.includes('name')) {
-                        result += `<strong>Name:</strong> ${item.first_name || ''} ${item.last_name || ''}<br>`;
+                        result += `<strong>Name:</strong> ${item.name || '<i>Not Available</i>'}<br>`;
                     }
                     if (selectedDisplayFields.includes('investment_firm')) {
-                        result += `<strong>Investment Firm:</strong> ${item.investment_firm_name || 'N/A'}<br>`;
+                        result += `<strong>Investment Firm:</strong> ${item.investment_firm || '<i>Not Available</i>'}<br>`;
                     }
                     if (selectedDisplayFields.includes('years_experience')) {
-                        result += `<strong>Years of Experience:</strong> ${item.years_experience || 'N/A'}<br>`;
-                    }
-                    if (selectedDisplayFields.includes('field_of_expertise')) {
-                        result += `<strong>Field of Expertise:</strong> ${item.investment_expertise || 'N/A'}<br>`;
+                        result += `<strong>Years of Experience:</strong> ${item.years_experience || '<i>Not Available</i>'}<br>`;
                     }
                     if (selectedDisplayFields.includes('personal_intro_text')) {
-                        result += `<strong>Intro:</strong> ${item.personal_intro_text || 'N/A'}<br>`;
+                        result += `<strong>Intro:</strong> ${item.personal_intro || '<i>Not Available</i>'}<br>`;
                     }
                     if (selectedDisplayFields.includes('portfolio')) {
-                        result += `<strong>Portfolio:</strong> ${item.portfolio || 'N/A'}<br>`;
+                        result += `<strong>Portfolio:</strong> ${item.portfolio || '<i>Not Available</i>'}<br>`;
                     }
                     if (selectedDisplayFields.includes('id')) {
-                        result += `<strong>ID:</strong> ${item.certification_ID || 'N/A'}<br>`;
+                        result += `<strong>ID:</strong> ${item.id || '<i>Not Available</i>'}<br>`;
                     }
                     return `<div class="result-item">${result}</div><hr>`;
                 })
@@ -737,6 +742,7 @@ async function lockInSearchManagers() {
         resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
     }
 }
+
 
 
 // Function to lock in the selected filters and display results in the results_container for Portfolios

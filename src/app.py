@@ -131,7 +131,7 @@ def search():
                 "ceo_name": "companies.ceo_name",
                 "industry": "companies.industry",
                 "company_info": "companies.company_info",
-                "symbol": "COALESCE(stocks.stock_code, 'N/A') AS symbol",
+                "symbol": "stocks.stock_code AS symbol",
                 "year_end_price": "stocks.year_end_price",
                 "year_end_market_value": "stocks.year_end_market_value",
                 "year_end_shares": "stocks.year_end_shares"
@@ -142,7 +142,7 @@ def search():
             query = f"""
                 SELECT {fields_to_select}
                 FROM companies
-                LEFT JOIN stocks ON TRIM(companies.name) = TRIM(stocks.company_name)
+                LEFT JOIN stocks ON companies.name = stocks.company_name
                 WHERE 1=1
             """
 
@@ -168,17 +168,17 @@ def search():
             # Filter by price
             if min_price or max_price:
                 filters.append("stocks.year_end_price BETWEEN %s AND %s")
-                params.extend([min_price or 0, max_price or float('inf')])
+                params.extend([float(min_price or 0), float(max_price or float('inf'))])
 
             # Filter by market value
             if min_market_value or max_market_value:
                 filters.append("stocks.year_end_market_value BETWEEN %s AND %s")
-                params.extend([min_market_value or 0, max_market_value or float('inf')])
+                params.extend([float(min_market_value or 0), float(max_market_value or float('inf'))])
 
             # Filter by shares
             if min_shares or max_shares:
                 filters.append("stocks.year_end_shares BETWEEN %s AND %s")
-                params.extend([min_shares or 0, max_shares or float('inf')])
+                params.extend([float(min_shares or 0), float(max_shares or float('inf'))])
 
             # Append filters
             if filters:
@@ -187,6 +187,7 @@ def search():
             # Execute the query
             print(f"Executing query: {query} with params: {params}")
             cursor.execute(query, tuple(params))
+
 
 
         elif entity == 'managers':
@@ -256,6 +257,7 @@ def search():
             # Execute the query
             print(f"Executing query: {query} with params: {params}")  # Debugging
             cursor.execute(query, tuple(params))
+
 
 
         elif entity == 'investment_banks':
