@@ -36,14 +36,43 @@
     <div class="container">
         <!-- Left Sidebar (Initially Hidden) -->
         <div id="left-sidebar-stocks" class="left-sidebar-stocks hidden">
+
+            <!-- Display Options -->
+            <h4>Display Options</h4>
+            <div class="display-options">
+                <label>
+                    <input type="checkbox" name="stock_display_option" value="code" onchange="updateStockDisplayPreferences()">
+                    Code
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="stock_display_option" value="name" onchange="updateStockDisplayPreferences()">
+                    Name
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="stock_display_option" value="year_end_price" onchange="updateStockDisplayPreferences()">
+                    Year-End Price
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="stock_display_option" value="year_end_shares" onchange="updateStockDisplayPreferences()">
+                    Year-End Shares
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="stock_display_option" value="year_end_market_value" onchange="updateStockDisplayPreferences()">
+                    Year-End Market Value
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" id="stock-select-all" onchange="selectAllStockDisplayOptions()">
+                    Select All
+                </label>
+            </div>
+
             <h3>Stock Filters</h3>
             <form id="stocks-filter-form">
-                <!-- Stock Name -->
-                <h4>Stock Name</h4>
-                <input 
-                    type="text" 
-                    id="stock-search-input" 
-                    placeholder="Enter stock name or symbol">
         
                 <!-- Price Range -->
                 <h4>Price Range</h4>
@@ -111,7 +140,7 @@
                 <br>
                 <span id="shares-range-value">100M - 15,000M</span>
         
-                <!-- Search Button -->
+                Search Button
                 <button 
                     type="button" 
                     id="lock-in-button" 
@@ -309,6 +338,11 @@
                     <input type="checkbox" name="bank_display_option" value="ceo_name" onchange="updateBankDisplayPreferences()">
                     Show CEO Name
                 </label>
+                <br>
+                <label>
+                    <input type="checkbox" name="bank_display_option" value="foundation_date" onchange="updateBankDisplayPreferences()">
+                    Show CEO Name
+                </label>
             </div>
 
             <div class="dropdown-container">
@@ -488,8 +522,8 @@
             </div>
 
             <!-- Lock In Search Button -->
-            <button onclick="lockInSearchManagers()">Lock In Search</button>
-            
+            <button onclick="lockInSearchPortfolios()">Lock In Search</button>
+
         </div>
 
         <!-- Password Form -->

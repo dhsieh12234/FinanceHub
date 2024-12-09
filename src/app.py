@@ -48,6 +48,9 @@ def search():
     investment_firm = request.args.get('investment_firm', '')
     min_years_experience = int(request.args.get('min_years_experience', 0))
     max_years_experience = int(request.args.get('max_years_experience', 50))
+    stock_symbol = request.args.get('stock_symbol', '')  
+    min_holders = request.args.get('min_holders', None)  
+    max_holders = request.args.get('max_holders', None) 
 
     try:
         connection = writer_instance.connect_to_database()
@@ -55,21 +58,43 @@ def search():
 
         # Entity-specific query handling
         if entity == 'stocks':
+            # Parse the display fields from the query parameters
+            display_fields = request.args.get('display_fields', 'code,name,year_end_price,year_end_shares,year_end_market_value').split(',')
+            valid_fields = {
+                'code': 'stock_code',
+                'name': 'name',
+                'year_end_price': 'year_end_price',
+                'year_end_shares': 'year_end_shares',
+                'year_end_market_value': 'year_end_market_value',
+            }
+            
+            # Map the selected display fields to actual database column names
+            selected_columns = [valid_fields[field] for field in display_fields if field in valid_fields]
+            
+            # Default to all fields if no valid display fields are selected
+            if not selected_columns:
+                selected_columns = list(valid_fields.values())
+
+            # Join selected columns into the SELECT statement
+            columns_to_select = ', '.join(selected_columns)
+
             if (
                 not min_price and not max_price and
                 not min_market_value and not max_market_value and
                 not min_shares and not max_shares
             ):
                 # Simple name-based query when only 'name' is provided
-                query = """
-                    SELECT * FROM stocks
+                query = f"""
+                    SELECT {columns_to_select}
+                    FROM stocks
                     WHERE name LIKE %s
                 """
                 params = (f"%{name}%",)
             else:
                 # Full query with filters
-                query = """
-                    SELECT * FROM stocks
+                query = f"""
+                    SELECT {columns_to_select}
+                    FROM stocks
                     WHERE
                         name LIKE %s
                         AND year_end_price BETWEEN %s AND %s
@@ -82,35 +107,55 @@ def search():
                     float(min_market_value or 0), float(max_market_value or float('inf')),
                     float(min_shares or 0), float(max_shares or float('inf')),
                 )
+
         elif entity == 'companies':
-            if entity == 'companies':
-                if not location and not industry and not name:
-                    # Simple query when no filters are provided
-                    query = """
-                        SELECT * FROM companies
-                    """
-                    params = ()
-                elif not location and not industry:
-                    # Simple name-based query when only 'name' is provided
-                    query = """
-                        SELECT * FROM companies
-                        WHERE name LIKE %s
-                    """
-                    params = (f"%{name}%",)
-                else:
-                    # Full query with filters
-                    query = """
-                        SELECT * FROM companies
-                        WHERE
-                            name LIKE %s
-                            AND (location LIKE %s OR %s = '')
-                            AND (industry LIKE %s OR %s = '')
-                    """
-                    params = (
-                        f"%{name}%",
-                        f"%{location}%", location or '',
-                        f"%{industry}%", industry or '',
-                    )
+            # Get the display fields from the request
+            display_fields = request.args.get('display_fields', '').split(',')
+
+            # Define allowed fields for security and validation
+            allowed_fields = ["name", "location", "phone_number", "ceo_name", "industry", "company_info"]
+
+            # Validate and use only the allowed fields
+            selected_fields = [field for field in display_fields if field in allowed_fields]
+
+            # If no fields are selected, default to all allowed fields
+            if not selected_fields:
+                selected_fields = allowed_fields
+
+            # Construct the SELECT clause dynamically
+            fields_to_select = ", ".join(selected_fields)
+
+            if not location and not industry and not name:
+                # Simple query when no filters are provided
+                query = f"""
+                    SELECT {fields_to_select}
+                    FROM companies
+                """
+                params = ()
+            elif not location and not industry:
+                # Simple name-based query when only 'name' is provided
+                query = f"""
+                    SELECT {fields_to_select}
+                    FROM companies
+                    WHERE name LIKE %s
+                """
+                params = (f"%{name}%",)
+            else:
+                # Full query with filters
+                query = f"""
+                    SELECT {fields_to_select}
+                    FROM companies
+                    WHERE
+                        name LIKE %s
+                        AND (location LIKE %s OR %s = '')
+                        AND (industry LIKE %s OR %s = '')
+                """
+                params = (
+                    f"%{name}%",
+                    f"%{location}%", location or '',
+                    f"%{industry}%", industry or '',
+                )
+
         elif entity == 'managers':
             # Base query
             query = """
@@ -154,9 +199,30 @@ def search():
             cursor.execute(query, tuple(params))
 
         elif entity == 'investment_banks':
-            query = """
-                SELECT investment_banks.name, investment_banks.location,
-                    investment_banks.industries, investment_banks.ceo_name
+            # Collect display fields
+            display_fields = request.args.get('display_fields', '').split(',')
+
+            # Map display fields to actual database columns
+            allowed_fields = {
+                "name": "investment_banks.name",
+                "location": "investment_banks.headquarters_location",
+                "industries": "investment_banks.industries",
+                "ceo_name": "investment_banks.ceo_name",
+                "foundation_date": "investment_banks.foundation_name"
+            }
+
+            # Determine which fields to select
+            selected_fields = [allowed_fields[field] for field in display_fields if field in allowed_fields]
+
+            # Default fields if no display preferences are selected
+            if not selected_fields:
+                selected_fields = ["investment_banks.name", "investment_banks.headquarters_location"]
+
+            fields_to_select = ", ".join(selected_fields)
+
+            # Base query with dynamic fields
+            query = f"""
+                SELECT {fields_to_select}
                 FROM investment_banks
                 WHERE 1=1
             """
@@ -184,8 +250,12 @@ def search():
             if filters:
                 query += " AND " + " AND ".join(filters)
 
+            # Debugging log
+            print(f"Executing query: {query} with params: {params}")
+
             # Execute the query
             cursor.execute(query, tuple(params))
+
 
         elif entity == 'investment_firms':
             query = """
@@ -194,39 +264,45 @@ def search():
             """
             params = (f"%{name}%",)
         elif entity == 'portfolios':
-            query = """
-                SELECT 
+            # Base query with placeholders for dynamic display fields
+            display_fields = request.args.get('display_fields', '').split(',')
+            if not display_fields or display_fields == ['']:
+                # Default to select all fields if none are specified
+                selected_fields = """
                     portfolios.name AS portfolio_name,
                     portfolios.foundation_date,
                     portfolios.year_end_market_value,
-                    portfolios.year_end_holders,
-                    managers.first_name AS manager_first_name,
-                    managers.last_name AS manager_last_name,
-                    portfolio_stock_relations.stock_code AS stock_code,
-                    stocks.name AS stock_name
+                    portfolios.year_end_holders
+                """
+            else:
+                # Dynamically build the fields to select
+                field_mapping = {
+                    'portfolio_name': "portfolios.name AS portfolio_name",
+                    'foundation_date': "portfolios.foundation_date",
+                    'year_end_market_value': "portfolios.year_end_market_value",
+                    'holders': "portfolios.year_end_holders",
+                }
+                selected_fields = ", ".join(field_mapping[field] for field in display_fields if field in field_mapping)
+
+            query = f"""
+                SELECT {selected_fields}
                 FROM portfolios
-                LEFT JOIN managers 
-                    ON portfolios.manager_ID = managers.certification_ID
-                LEFT JOIN portfolio_stock_relations 
-                    ON portfolios.portfolio_code = portfolio_stock_relations.portfolio_code
-                LEFT JOIN stocks 
-                    ON portfolio_stock_relations.stock_code = stocks.stock_code
                 WHERE 1=1
             """
+
             filters = []
             params = []
 
-            # Stock symbol filter
-            if stock_symbol:
-                filters.append("stocks.stock_code LIKE %s")
-                params.append(f"%{stock_symbol}%")
-
             # Min and Max Year-End Market Value
+            min_market_value = request.args.get('min_market_value', None)
+            max_market_value = request.args.get('max_market_value', None)
             if min_market_value or max_market_value:
                 filters.append("portfolios.year_end_market_value BETWEEN %s AND %s")
                 params.extend([min_market_value or 0, max_market_value or float('inf')])
 
             # Min and Max Year-End Holders
+            min_holders = request.args.get('min_holders', None)
+            max_holders = request.args.get('max_holders', None)
             if min_holders or max_holders:
                 filters.append("portfolios.year_end_holders BETWEEN %s AND %s")
                 params.extend([min_holders or 0, max_holders or float('inf')])
@@ -235,7 +311,14 @@ def search():
             if filters:
                 query += " AND " + " AND ".join(filters)
 
+            # Debugging: Print the query and parameters
+            print(f"Executing query: {query}")
+            print(f"With parameters: {params}")
+
+            # Execute the query
             cursor.execute(query, tuple(params))
+
+
 
         else:
             return jsonify({"error": f"Unsupported entity type: {entity}"}), 400

@@ -400,6 +400,11 @@ async function lockInSearchStocks() {
     const minShares = (document.getElementById('min_shares')?.value || 100) * 1_000_000; // Convert millions
     const maxShares = (document.getElementById('max_shares')?.value || 15_000) * 1_000_000; // Convert millions
 
+    // Collect selected display options
+    const selectedDisplayOptions = Array.from(
+        document.querySelectorAll('input[name="stock_display_option"]:checked')
+    ).map((option) => option.value);
+
     const resultsContainer = document.getElementById('results_container');
     if (!resultsContainer) {
         console.error('Results container not found.');
@@ -419,6 +424,7 @@ async function lockInSearchStocks() {
             max_market_value: maxMarketValue,
             min_shares: minShares,
             max_shares: maxShares,
+            display_fields: selectedDisplayOptions.join(','), // Send display options as a comma-separated string
         });
 
         console.log(`Query parameters: ${params.toString()}`); // Debugging
@@ -434,15 +440,25 @@ async function lockInSearchStocks() {
             resultsContainer.innerHTML = '<p>No results found for the specified criteria.</p>';
         } else {
             resultsContainer.innerHTML = data
-                .map(
-                    (item) =>
-                        `<div class="result-item">
-                            <strong>${item.stock_code || 'N/A'}</strong>: ${item.name || 'N/A'}<br>
-                            Year-End Price: $${item.year_end_price || 'N/A'}<br>
-                            Market Value: $${item.year_end_market_value || 'N/A'}<br>
-                            Total Shares: ${item.year_end_shares || 'N/A'}
-                        </div>`
-                )
+                .map((item) => {
+                    let result = '';
+                    if (selectedDisplayOptions.includes('code')) {
+                        result += `<strong>Code:</strong> ${item.stock_code || 'N/A'}<br>`;
+                    }
+                    if (selectedDisplayOptions.includes('name')) {
+                        result += `<strong>Name:</strong> ${item.name || 'N/A'}<br>`;
+                    }
+                    if (selectedDisplayOptions.includes('year_end_price')) {
+                        result += `<strong>Year-End Price:</strong> $${item.year_end_price || 'N/A'}<br>`;
+                    }
+                    if (selectedDisplayOptions.includes('year_end_shares')) {
+                        result += `<strong>Year-End Shares:</strong> ${item.year_end_shares || 'N/A'}<br>`;
+                    }
+                    if (selectedDisplayOptions.includes('year_end_market_value')) {
+                        result += `<strong>Year-End Market Value:</strong> $${item.year_end_market_value || 'N/A'}<br>`;
+                    }
+                    return `<div class="result-item">${result}</div><hr>`;
+                })
                 .join('');
         }
     } catch (error) {
@@ -451,14 +467,17 @@ async function lockInSearchStocks() {
     }
 }
 
-// Function to lock in the selected filters and display results in the results_container for Companies
+
 async function lockInSearchCompanies() {
-    console.log("Lock In Search for Companies triggered"); // Debugging
+    console.log("Lock In Search for Companies triggered");
+
+    // Collect selected display options
+    const selectedDisplayOptions = updateDisplayPreferences('company');
 
     // Collect filter values
-    const nameInput = document.getElementById('company-search-input')?.value.trim() || ''; // Company name input
-    const industryInput = document.getElementById('company_industry')?.value || ''; // Selected industry
-    const cityInput = document.getElementById('company_city')?.value || ''; // Selected city
+    const nameInput = document.getElementById('company-search-input')?.value.trim() || '';
+    const industryInput = document.getElementById('company_industry')?.value || '';
+    const cityInput = document.getElementById('company_city')?.value || '';
 
     const resultsContainer = document.getElementById('results_container');
     if (!resultsContainer) {
@@ -475,9 +494,10 @@ async function lockInSearchCompanies() {
             name: nameInput,
             industry: industryInput,
             city: cityInput,
+            display_fields: selectedDisplayOptions.join(','), // Pass selected fields as a comma-separated string
         });
 
-        console.log(`Query parameters for companies: ${params.toString()}`); // Debugging
+        console.log(`Query parameters for companies: ${params.toString()}`);
 
         // Fetch results
         const response = await fetch(`/search?${params.toString()}`);
@@ -490,23 +510,27 @@ async function lockInSearchCompanies() {
             resultsContainer.innerHTML = '<p>No results found for the specified criteria.</p>';
         } else {
             resultsContainer.innerHTML = data
-                .map(
-                    (item) =>
-                        `<div class="result-item">
-                            <strong>${item.name || 'N/A'}</strong><br>
-                            Industry: ${item.industry || 'N/A'}<br>
-                            City: ${item.city || 'N/A'}<br>
-                            CEO Name: ${item.ceo_name || 'N/A'}<br>
-                            Company Info: ${item.company_info || 'N/A'}
-                        </div>`
-                )
+                .map((item) => {
+                    return `
+                        <div class="result-item">
+                            ${selectedDisplayOptions.includes('name') ? `<strong>Name:</strong> ${item.name || 'N/A'}<br>` : ''}
+                            ${selectedDisplayOptions.includes('symbol') ? `<strong>Symbol:</strong> ${item.symbol || 'N/A'}<br>` : ''}
+                            ${selectedDisplayOptions.includes('location') ? `<strong>Location:</strong> ${item.location || 'N/A'}<br>` : ''}
+                            ${selectedDisplayOptions.includes('ceo_name') ? `<strong>CEO Name:</strong> ${item.ceo_name || 'N/A'}<br>` : ''}
+                            ${selectedDisplayOptions.includes('industry') ? `<strong>Industry:</strong> ${item.industry || 'N/A'}<br>` : ''}
+                            ${selectedDisplayOptions.includes('company_info') ? `<strong>Company Info:</strong> ${item.company_info || 'N/A'}<br>` : ''}
+                        </div>
+                        <hr>
+                    `;
+                })
                 .join('');
         }
     } catch (error) {
-        console.error(error); // Debugging
+        console.error(error);
         resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
     }
 }
+
 
 // Function to lock in the selected filters and display results in the results_container for Banks
 async function lockInSearchBanks() {
@@ -516,6 +540,11 @@ async function lockInSearchBanks() {
     const nameInput = document.getElementById('bank-search-input')?.value.trim() || ''; // Bank name input
     const locationInput = document.getElementById('location-dropdown')?.value || ''; // Selected location
     const industryInput = document.getElementById('industry-dropdown')?.value || ''; // Selected industry
+
+    // Collect selected display preferences
+    const displayPreferences = Array.from(
+        document.querySelectorAll('input[name="bank_display_option"]:checked')
+    ).map(option => option.value);
 
     const resultsContainer = document.getElementById('results_container');
     if (!resultsContainer) {
@@ -532,6 +561,7 @@ async function lockInSearchBanks() {
             name: nameInput,
             location: locationInput,
             industry: industryInput,
+            display_fields: displayPreferences.join(','), // Send selected display preferences as a comma-separated string
         });
 
         console.log(`Query parameters for banks: ${params.toString()}`); // Debugging
@@ -546,23 +576,36 @@ async function lockInSearchBanks() {
         } else if (data.length === 0) {
             resultsContainer.innerHTML = '<p>No results found for the specified criteria.</p>';
         } else {
+            // Render the results dynamically based on selected display fields
             resultsContainer.innerHTML = data
-                .map(
-                    (item) =>
-                        `<div class="result-item">
-                            <strong>${item.name || 'N/A'}</strong><br>
-                            Location: ${item.location || 'N/A'}<br>
-                            Industry: ${item.industry || 'N/A'}<br>
-                            CEO Name: ${item.ceo_name || 'N/A'}
-                        </div>`
-                )
+                .map((item) => {
+                    let resultHTML = '<div class="result-item">';
+                    if (displayPreferences.includes('name')) {
+                        resultHTML += `<strong>Name:</strong> ${item.name || 'N/A'}<br>`;
+                    }
+                    if (displayPreferences.includes('location')) {
+                        resultHTML += `<strong>Location:</strong> ${item.location || 'N/A'}<br>`;
+                    }
+                    if (displayPreferences.includes('industries')) {
+                        resultHTML += `<strong>Industries:</strong> ${item.industries || 'N/A'}<br>`;
+                    }
+                    if (displayPreferences.includes('ceo_name')) {
+                        resultHTML += `<strong>CEO Name:</strong> ${item.ceo_name || 'N/A'}<br>`;
+                    }
+                    if (displayPreferences.includes('foundation_date')) {
+                        resultHTML += `<strong>CEO Name:</strong> ${item.foundation_date || 'N/A'}<br>`;
+                    }
+                    resultHTML += '</div><hr>';
+                    return resultHTML;
+                })
                 .join('');
         }
     } catch (error) {
-        console.error(error); // Debugging
+        console.error("Error during search:", error); // Debugging
         resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
     }
 }
+
 
 // Function to lock in the selected filters and display results in the results_container for Managers
 async function lockInSearchManagers() {
@@ -627,10 +670,98 @@ async function lockInSearchManagers() {
     }
 }
 
+// Function to lock in the selected filters and display results in the results_container for Portfolios
+async function lockInSearchPortfolios() {
+    console.log("Lock In Search for Portfolios triggered"); // Debugging
+
+    // Collect filter values
+    const stockSymbol = document.getElementById('stock-symbol-input')?.value.trim() || ''; // Stock symbol input
+    const minMarketValue = (document.getElementById('min-market-value')?.value || 0) * 1_000_000; // Convert millions
+    const maxMarketValue = (document.getElementById('max-market-value')?.value || 1_000_000) * 1_000_000; // Convert millions
+    const minHolders = document.getElementById('min-holders')?.value || 0;
+    const maxHolders = document.getElementById('max-holders')?.value || 10_000;
+
+    // Collect selected display options
+    const selectedDisplayOptions = Array.from(
+        document.querySelectorAll('input[class="portfolio-display-option"]:checked')
+    ).map((option) => option.value);
+
+    const resultsContainer = document.getElementById('results_container');
+    if (!resultsContainer) {
+        console.error('Results container not found.');
+        return;
+    }
+
+    resultsContainer.innerHTML = '<p>Loading results...</p>';
+
+    try {
+        // Build query parameters
+        const params = new URLSearchParams({
+            entity: 'portfolios',
+            stock_symbol: stockSymbol,
+            min_market_value: minMarketValue,
+            max_market_value: maxMarketValue,
+            min_holders: minHolders,
+            max_holders: maxHolders,
+            display_fields: selectedDisplayOptions.join(','), // Send display options as a comma-separated string
+        });
+
+        console.log(`Query parameters for portfolios: ${params.toString()}`); // Debugging
+
+        // Fetch results
+        const response = await fetch(`/search?${params.toString()}`);
+        const data = await response.json();
+
+        // Check and display results
+        if (data.error) {
+            resultsContainer.innerHTML = `<p>Error: ${data.error}</p>`;
+        } else if (data.length === 0) {
+            resultsContainer.innerHTML = '<p>No results found for the specified criteria.</p>';
+        } else {
+            resultsContainer.innerHTML = data
+                .map((item) => {
+                    let result = '';
+                    if (selectedDisplayOptions.includes('portfolio_name')) {
+                        result += `<strong>Portfolio Name:</strong> ${item.portfolio_name || 'N/A'}<br>`;
+                    }
+                    if (selectedDisplayOptions.includes('stock')) {
+                        result += `<strong>Stock:</strong> ${item.stock || 'N/A'}<br>`;
+                    }
+                    if (selectedDisplayOptions.includes('foundation_date')) {
+                        result += `<strong>Date of Foundation:</strong> ${item.foundation_date || 'N/A'}<br>`;
+                    }
+                    if (selectedDisplayOptions.includes('manager')) {
+                        result += `<strong>Manager:</strong> ${item.manager || 'N/A'}<br>`;
+                    }
+                    if (selectedDisplayOptions.includes('holders')) {
+                        result += `<strong>Number of Holders:</strong> ${item.holders || 'N/A'}<br>`;
+                    }
+                    if (selectedDisplayOptions.includes('year_end_market_value')) {
+                        result += `<strong>Year-End Market Value:</strong> $${item.year_end_market_value || 'N/A'}<br>`;
+                    }
+                    return `<div class="result-item">${result}</div><hr>`;
+                })
+                .join('');
+        }
+    } catch (error) {
+        console.error(error); // Debugging
+        resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+    }
+}
 
 
 
+// update Display Preferences
+function updateDisplayPreferences(entity) {
+    // Find all display options related to the given entity
+    const checkboxes = document.querySelectorAll(`input[name="${entity}_display_option"]:checked`);
 
+    // Map the checked checkboxes to their values
+    const selectedOptions = Array.from(checkboxes).map((checkbox) => checkbox.value);
+
+    console.log(`Selected Display Preferences for ${entity}:`, selectedOptions); // Debugging
+    return selectedOptions;
+}
 
 
 // Utility function to capitalize first letter
