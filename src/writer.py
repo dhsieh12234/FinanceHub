@@ -45,6 +45,7 @@ class Writer:
             cursor.execute("DROP TABLE IF EXISTS Companies")
             cursor.execute("DROP TABLE IF EXISTS Investment_Firms")
             cursor.execute("DROP TABLE IF EXISTS Investment_Banks")
+            cursor.execute("DROP TABLE IF EXISTS Bank_Company_Relations")
 
             # Create tables
             cursor.execute("""
@@ -118,6 +119,8 @@ class Writer:
                 FOREIGN KEY (portfolio_code) REFERENCES Portfolios(portfolio_code),
                 FOREIGN KEY (stock_code) REFERENCES Stocks(stock_code)
             )""")
+
+            
 
             connection.commit()
             print("Tables created successfully!")

@@ -13,6 +13,7 @@ class Reader:
         self.managers_df = pd.read_pickle(os.path.join(self.data_folder_path,'managers.pkl'))
         self.portfolios_df = pd.read_pickle(os.path.join(self.data_folder_path,'portfolios.pkl'))
         self.portfolio_stock_df = pd.read_pickle(os.path.join(self.data_folder_path,'portfolio_stock_relations.pkl'))
+        self.banks_company_relations_df = pd.read_pickle(os.path.join(self.data_folder_path, 'bank_company_relations.pkl'))
     
     def get_company(self):
         return self.companies_df

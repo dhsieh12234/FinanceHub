@@ -478,16 +478,16 @@ async function lockInSearchCompanies() {
     const cityInput = document.getElementById('company_city')?.value || ''; // Selected city
 
     // Collect price range
-    const minPrice = document.getElementById('min_price')?.value || 0;
-    const maxPrice = document.getElementById('max_price')?.value || Number.MAX_SAFE_INTEGER;
+    const minPrice = document.getElementById('min_price2')?.value || 0;
+    const maxPrice = document.getElementById('max_price2')?.value || Number.MAX_SAFE_INTEGER;
 
     // Collect market value (convert billions to raw numbers)
-    const minMarketValue = (document.getElementById('min_market_value')?.value || 0) * 1_000_000_000;
-    const maxMarketValue = (document.getElementById('max_market_value')?.value || Number.MAX_SAFE_INTEGER) * 1_000_000_000;
+    const minMarketValue = (document.getElementById('min_market_value2')?.value || 0) * 1_000_000_000;
+    const maxMarketValue = (document.getElementById('max_market_value2')?.value || Number.MAX_SAFE_INTEGER) * 1_000_000_000;
 
     // Collect total shares (convert millions to raw numbers)
-    const minShares = (document.getElementById('min_shares')?.value || 0) * 1_000_000;
-    const maxShares = (document.getElementById('max_shares')?.value || Number.MAX_SAFE_INTEGER) * 1_000_000;
+    const minShares = (document.getElementById('min_shares2')?.value || 0) * 1_000_000;
+    const maxShares = (document.getElementById('max_shares2')?.value || Number.MAX_SAFE_INTEGER) * 1_000_000;
 
     // Collect selected display options
     const selectedDisplayOptions = Array.from(
@@ -513,13 +513,13 @@ async function lockInSearchCompanies() {
             entity: 'companies',
             name: nameInput,
             industry: industryInput,
-            city: cityInput,
-            min_price: minPrice,
-            max_price: maxPrice,
-            min_market_value: minMarketValue,
-            max_market_value: maxMarketValue,
-            min_shares: minShares,
-            max_shares: maxShares,
+            location: cityInput,
+            min_price2: minPrice,
+            max_price2: maxPrice,
+            min_market_value2: minMarketValue,
+            max_market_value2: maxMarketValue,
+            min_shares2: minShares,
+            max_shares2: maxShares,
             display_fields: selectedDisplayOptions.join(','), // Send display options as a comma-separated string
         });
 
@@ -560,15 +560,16 @@ async function lockInSearchCompanies() {
                     if (selectedDisplayOptions.includes('company_info')) {
                         result += `<strong>Company Info:</strong> ${item.company_info || '<i>Not Available</i>'}<br>`;
                     }
-                    if (selectedDisplayOptions.includes('year_end_price')) {
-                        result += `<strong>Year-End Price:</strong> $${item.year_end_price || '<i>Not Available</i>'}<br>`;
+                    if (selectedDisplayOptions.includes('year_end_price2')) {
+                        result += `<strong>Year-End Price:</strong> $${item.year_end_price2 || '<i>Not Available</i>'}<br>`;
                     }
-                    if (selectedDisplayOptions.includes('year_end_shares')) {
-                        result += `<strong>Year-End Shares:</strong> ${new Intl.NumberFormat().format(item.year_end_shares) || '<i>Not Available</i>'}<br>`;
+                    if (selectedDisplayOptions.includes('year_end_shares2')) {
+                        result += `<strong>Year-End Shares:</strong> ${new Intl.NumberFormat().format(item.year_end_shares2) || '<i>Not Available</i>'}<br>`;
                     }
-                    if (selectedDisplayOptions.includes('year_end_market_value')) {
-                        result += `<strong>Year-End Market Value:</strong> $${new Intl.NumberFormat().format(item.year_end_market_value) || '<i>Not Available</i>'}<br>`;
+                    if (selectedDisplayOptions.includes('year_end_market_value2')) {
+                        result += `<strong>Year-End Market Value:</strong> $${new Intl.NumberFormat().format(item.year_end_market_value2) || '<i>Not Available</i>'}<br>`;
                     }
+                    
                     return `<div class="result-item">${result}</div><hr>`;
                 })
                 .join('');
@@ -609,7 +610,7 @@ async function lockInSearchBanks() {
         const params = new URLSearchParams({
             entity: 'investment_banks',
             name: nameInput,
-            location: locationInput,
+            headquarters_location: locationInput,
             industry: industryInput,
             display_fields: displayPreferences.join(','), // Send selected display preferences as a comma-separated string
         });
@@ -634,7 +635,7 @@ async function lockInSearchBanks() {
                         resultHTML += `<strong>Name:</strong> ${item.name || 'N/A'}<br>`;
                     }
                     if (displayPreferences.includes('location')) {
-                        resultHTML += `<strong>Location:</strong> ${item.location || 'N/A'}<br>`;
+                        resultHTML += `<strong>Location:</strong> ${item.headquarters_location || 'N/A'}<br>`;
                     }
                     if (displayPreferences.includes('industries')) {
                         resultHTML += `<strong>Industries:</strong> ${item.industries || 'N/A'}<br>`;
@@ -690,7 +691,7 @@ async function lockInSearchManagers() {
         const params = new URLSearchParams({
             entity: 'managers',
             name: nameInput,
-            investment_firm: selectedInvestmentFirm,
+            investment_firm_name: selectedInvestmentFirm,
             min_years_experience: minYearsExperience,
             max_years_experience: maxYearsExperience,
             display_fields: selectedDisplayFields.join(','), // Send display options as a comma-separated string
@@ -719,7 +720,7 @@ async function lockInSearchManagers() {
                         result += `<strong>Name:</strong> ${item.name || '<i>Not Available</i>'}<br>`;
                     }
                     if (selectedDisplayFields.includes('investment_firm')) {
-                        result += `<strong>Investment Firm:</strong> ${item.investment_firm || '<i>Not Available</i>'}<br>`;
+                        result += `<strong>Investment Firm:</strong> ${item.investment_firm_name || '<i>Not Available</i>'}<br>`;
                     }
                     if (selectedDisplayFields.includes('years_experience')) {
                         result += `<strong>Years of Experience:</strong> ${item.years_experience || '<i>Not Available</i>'}<br>`;

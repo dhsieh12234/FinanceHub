@@ -43,14 +43,21 @@ def search():
     max_market_value = request.args.get('max_market_value', None)
     min_shares = request.args.get('min_shares', None)
     max_shares = request.args.get('max_shares', None)
-    location = request.args.get('location_headquarters', '')
+    headquarters_location = request.args.get('headquarters_location', '')
     industry = request.args.get('industry', '')
-    investment_firm = request.args.get('investment_firm', '')
+    investment_firm_name = request.args.get('investment_firm_name', None)
     min_years_experience = int(request.args.get('min_years_experience', 0))
     max_years_experience = int(request.args.get('max_years_experience', 50))
     stock_symbol = request.args.get('stock_symbol', '')  
     min_holders = request.args.get('min_holders', None)  
     max_holders = request.args.get('max_holders', None) 
+    location = request.args.get('location', '')
+    min_price2 = request.args.get('min_price2', None)
+    max_price2 = request.args.get('max_price2', None)
+    min_market_value2 = request.args.get('min_market_value2', None)
+    max_market_value2 = request.args.get('max_market_value2', None)
+    min_shares2 = request.args.get('min_shares2', None)
+    max_shares2 = request.args.get('max_shares2', None)
 
     try:
         connection = writer_instance.connect_to_database()
@@ -115,7 +122,7 @@ def search():
             # Define allowed fields
             allowed_fields = [
                 "name", "location", "phone_number", "ceo_name", "industry",
-                "company_info", "symbol", "year_end_price", "year_end_market_value", "year_end_shares"
+                "company_info", "symbol", "year_end_price2", "year_end_market_value2", "year_end_shares2"
             ]
 
             # Validate and use only allowed fields
@@ -132,13 +139,13 @@ def search():
                 "industry": "companies.industry",
                 "company_info": "companies.company_info",
                 "symbol": "stocks.stock_code AS symbol",
-                "year_end_price": "stocks.year_end_price",
-                "year_end_market_value": "stocks.year_end_market_value",
-                "year_end_shares": "stocks.year_end_shares"
+                "year_end_price2": "stocks.year_end_price AS year_end_price2",
+                "year_end_market_value2": "stocks.year_end_market_value AS year_end_market_value2",
+                "year_end_shares2": "stocks.year_end_shares AS year_end_shares2"
             }
             fields_to_select = ", ".join(field_mapping[field] for field in selected_fields)
 
-            # Build query
+            # Build the query
             query = f"""
                 SELECT {fields_to_select}
                 FROM companies
@@ -165,28 +172,41 @@ def search():
                 filters.append("companies.industry LIKE %s")
                 params.append(f"%{industry}%")
 
-            # Filter by price
-            if min_price or max_price:
+            # Filter by stocks.year_end_price
+            if min_price2 or max_price2:
                 filters.append("stocks.year_end_price BETWEEN %s AND %s")
-                params.extend([float(min_price or 0), float(max_price or float('inf'))])
+                params.extend([
+                    float(min_price2 or 0),
+                    float(max_price2 or float('inf'))
+                ])
 
-            # Filter by market value
-            if min_market_value or max_market_value:
+            # Filter by stocks.year_end_market_value
+            if min_market_value2 or max_market_value2:
                 filters.append("stocks.year_end_market_value BETWEEN %s AND %s")
-                params.extend([float(min_market_value or 0), float(max_market_value or float('inf'))])
+                params.extend([
+                    float(min_market_value2 or 0),
+                    float(max_market_value2 or float('inf'))
+                ])
 
-            # Filter by shares
-            if min_shares or max_shares:
+            # Filter by stocks.year_end_shares
+            if min_shares2 or max_shares2:
                 filters.append("stocks.year_end_shares BETWEEN %s AND %s")
-                params.extend([float(min_shares or 0), float(max_shares or float('inf'))])
+                params.extend([
+                    float(min_shares2 or 0),
+                    float(max_shares2 or float('inf'))
+                ])
 
             # Append filters
             if filters:
                 query += " AND " + " AND ".join(filters)
 
+            # Debugging
+            print(f"Executing query: {query}")
+            print(f"With parameters: {params}")
+
             # Execute the query
-            print(f"Executing query: {query} with params: {params}")
             cursor.execute(query, tuple(params))
+
 
 
 
@@ -209,7 +229,7 @@ def search():
                 field_mapping = {
                     'id': "managers.certification_ID",
                     'name': "CONCAT(managers.first_name, ' ', managers.last_name) AS name",
-                    'investment_firm': "managers.investment_firm_name",
+                    'investment_firm_name': "managers.investment_firm_name",
                     'years_experience': "managers.years_experience",
                     'field_of_expertise': "managers.investment_expertise",
                     'personal_intro_text': "managers.personal_intro",
@@ -236,9 +256,9 @@ def search():
                 params.extend([f"%{name}%", f"%{name}%"])
 
             # Filter by investment firm
-            if investment_firm:
+            if investment_firm_name:
                 filters.append("managers.investment_firm_name LIKE %s")
-                params.append(f"%{investment_firm}%")
+                params.append(f"%{investment_firm_name}%")
 
             # Filter by years of experience
             if min_years_experience or max_years_experience:
@@ -252,7 +272,8 @@ def search():
             if filters:
                 query += " AND " + " AND ".join(filters)
             
-            query += " GROUP BY managers.certification_ID"
+            query += " GROUP BY managers.certification_ID, managers.first_name, managers.last_name, managers.investment_firm_name, managers.years_experience, managers.investment_expertise, managers.personal_intro"
+
             
             # Execute the query
             print(f"Executing query: {query} with params: {params}")  # Debugging
@@ -278,7 +299,7 @@ def search():
 
             # # Default fields if no display preferences are selected
             if not selected_fields:
-                selected_fields = ["investment_banks.name", "investment_banks.headquarters_location"]
+                selected_fields = ["investment_banks.name",  "ceo_name"]
 
             fields_to_select = ", ".join(selected_fields)
 
@@ -299,9 +320,9 @@ def search():
                 params.append(f"%{name}%")
 
             # Filter by location
-            if location:
+            if headquarters_location:
                 filters.append("investment_banks.headquarters_location LIKE %s")
-                params.append(f"%{location}%")
+                params.append(f"%{headquarters_location}%")
 
             # Filter by industry
             if industry:
@@ -325,6 +346,8 @@ def search():
                 WHERE name LIKE %s
             """
             params = (f"%{name}%",)
+
+
         elif entity == 'portfolios':
             # Base query with placeholders for dynamic display fields
             display_fields = request.args.get('display_fields', '').split(',')
@@ -334,7 +357,8 @@ def search():
                     portfolios.name AS portfolio_name,
                     portfolios.foundation_date,
                     portfolios.year_end_market_value,
-                    portfolios.year_end_holders
+                    portfolios.year_end_holders AS holders
+                    CONCAT(managers.first_name, ' ', managers.last_name) AS manager_name
                 """
             else:
                 # Dynamically build the fields to select
@@ -342,13 +366,15 @@ def search():
                     'portfolio_name': "portfolios.name AS portfolio_name",
                     'foundation_date': "portfolios.foundation_date",
                     'year_end_market_value': "portfolios.year_end_market_value",
-                    'holders': "portfolios.year_end_holders",
+                    'holders': "portfolios.year_end_holders AS holders",
+                    'manager' : "CONCAT(managers.first_name, ' ', managers.last_name) AS manager"
                 }
                 selected_fields = ", ".join(field_mapping[field] for field in display_fields if field in field_mapping)
 
             query = f"""
                 SELECT {selected_fields}
                 FROM portfolios
+                LEFT JOIN managers ON portfolios.manager_ID = managers.certification_ID
                 WHERE 1=1
             """
 
@@ -374,6 +400,7 @@ def search():
                 query += " AND " + " AND ".join(filters)
 
             # Debugging: Print the query and parameters
+            print(f"Selected Fields: {selected_fields}")
             print(f"Executing query: {query}")
             print(f"With parameters: {params}")
 
