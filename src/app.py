@@ -218,7 +218,7 @@ def search():
                 selected_fields = """
                     managers.manager_id, 
                     CONCAT(managers.first_name, ' ', managers.last_name) AS name,
-                    investment_firms.name AS investment_firm_name, 
+                    managers.investment_firm_name, 
                     managers.years_experience, 
                     managers.investment_expertise, 
                     managers.personal_intro, 
@@ -242,7 +242,6 @@ def search():
                 SELECT {selected_fields}
                 FROM managers
                 LEFT JOIN portfolios ON managers.manager_id = portfolios.manager_id
-                LEFT JOIN investment_firms ON managers.firm_id = investment_firms.firm_id
                 WHERE 1=1
             """
 
@@ -277,10 +276,10 @@ def search():
                 managers.manager_id, 
                 managers.first_name, 
                 managers.last_name, 
+                managers.investment_firm_name, 
                 managers.years_experience, 
                 managers.investment_expertise, 
-                managers.personal_intro,
-                investment_firms.name
+                managers.personal_intro
             """
 
             # Execute the query
