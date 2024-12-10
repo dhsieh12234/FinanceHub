@@ -469,6 +469,22 @@ def search():
             # Execute the query
             cursor.execute(query, tuple(params))
 
+        elif entity == 'searching_for':
+            entity_set_name = request.args.get('entity_set_name', '').strip()
+            search_name = request.args.get('name', '').strip()
+
+            if not entity_set_name:
+                return jsonify({"error": "entity_set_name is required"}), 400
+            if not search_name:
+                return jsonify({"error": "name is required"}), 400
+
+            query = f"SELECT * FROM {entity_set_name} WHERE name = %s"
+            params = (search_name,)
+            cursor.execute(query, params)
+            results = cursor.fetchall()
+            return jsonify(results)
+
+
 
 
         else:

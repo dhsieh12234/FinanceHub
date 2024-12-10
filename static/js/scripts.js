@@ -853,4 +853,83 @@ function selectAllCheckboxes(entity) {
 }
 
 
+async function handleEntitySearch() {
+    console.log("Entity Search triggered"); // Debugging
+
+    const entitySetNameInput = document.getElementById('entity-set-name');
+    const entityNameInput = document.getElementById('entity-name');
+    const resultsContainer = document.getElementById('results_container');
+
+    if (!resultsContainer) {
+        console.error('Results container not found.');
+        return;
+    }
+
+    // Validate input
+    const entitySetName = entitySetNameInput.value.trim();
+    const name = entityNameInput.value.trim();
+
+    if (!entitySetName) {
+        alert('Please enter an entity_set_name.');
+        return;
+    }
+
+    if (!name) {
+        alert('Please enter a name to search.');
+        return;
+    }
+
+    // Show a loading message
+    resultsContainer.innerHTML = '<p>Loading results...</p>';
+
+    try {
+        // Build query parameters
+        const params = new URLSearchParams({
+            entity: "searching_for",
+            entity_set_name: entitySetName,
+            name: name
+        });
+
+        console.log(`Query parameters: ${params.toString()}`); // Debugging
+
+        // Fetch results from the server
+        const response = await fetch(`/search?${params.toString()}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("API Response:", data); // Debugging
+
+        // Check and display results
+        if (data.error) {
+            resultsContainer.innerHTML = `<p>Error: ${data.error}</p>`;
+        } else if (data.length === 0) {
+            resultsContainer.innerHTML = '<p>No results found for the specified criteria.</p>';
+        } else {
+            // Display the data in a simple structured format
+            resultsContainer.innerHTML = data.map(item => {
+                let content = '<table class="result-table">';
+                // Loop through each key-value pair in the item
+                for (const [key, value] of Object.entries(item)) {
+                    content += `
+                        <tr>
+                            <td><strong>${key}:</strong></td>
+                            <td>${value !== null && value !== undefined ? value : 'N/A'}</td>
+                        </tr>
+                    `;
+                }
+                content += '</table>';
+                return `<div class="result-item">${content}</div><hr>`;
+            }).join('');
+        }
+    } catch (error) {
+        console.error("Error during search:", error); // Debugging
+        resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
+    }
+}
+
+
+
+
 
