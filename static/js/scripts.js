@@ -479,15 +479,15 @@ async function lockInSearchCompanies() {
 
     // Collect price range
     const minPrice = document.getElementById('min_price2')?.value || 0;
-    const maxPrice = document.getElementById('max_price2')?.value || Number.MAX_SAFE_INTEGER;
+    const maxPrice = document.getElementById('max_price2')?.value || 1200;
 
     // Collect market value (convert billions to raw numbers)
     const minMarketValue = (document.getElementById('min_market_value2')?.value || 0) * 1_000_000_000;
-    const maxMarketValue = (document.getElementById('max_market_value2')?.value || Number.MAX_SAFE_INTEGER) * 1_000_000_000;
+    const maxMarketValue = (document.getElementById('max_market_value2')?.value || 5000) * 1_000_000_000;
 
     // Collect total shares (convert millions to raw numbers)
     const minShares = (document.getElementById('min_shares2')?.value || 0) * 1_000_000;
-    const maxShares = (document.getElementById('max_shares2')?.value || Number.MAX_SAFE_INTEGER) * 1_000_000;
+    const maxShares = (document.getElementById('max_shares2')?.value || 16000) * 1_000_000;
 
     // Collect selected display options
     const selectedDisplayOptions = Array.from(
@@ -644,7 +644,7 @@ async function lockInSearchBanks() {
                         resultHTML += `<strong>CEO Name:</strong> ${item.ceo_name || 'N/A'}<br>`;
                     }
                     if (displayPreferences.includes('foundation_date')) {
-                        resultHTML += `<strong>CEO Name:</strong> ${item.foundation_date || 'N/A'}<br>`;
+                        resultHTML += `<strong>Foundation Date:</strong> ${item.foundation_date || 'N/A'}<br>`;
                     }
                     resultHTML += '</div><hr>';
                     return resultHTML;

@@ -149,7 +149,7 @@ def search():
             query = f"""
                 SELECT {fields_to_select}
                 FROM companies
-                LEFT JOIN stocks ON companies.name = stocks.company_name
+                LEFT JOIN stocks ON companies.company_id = stocks.company_id
                 WHERE 1=1
             """
 
@@ -216,7 +216,7 @@ def search():
             if not display_fields or display_fields == ['']:
                 # Default to select all fields if no display fields are specified
                 selected_fields = """
-                    managers.certification_ID, 
+                    managers.manager_id, 
                     CONCAT(managers.first_name, ' ', managers.last_name) AS name,
                     managers.investment_firm_name, 
                     managers.years_experience, 
@@ -227,7 +227,7 @@ def search():
             else:
                 # Dynamically build the fields to select
                 field_mapping = {
-                    'id': "managers.certification_ID",
+                    'id': "managers.manager_id",
                     'name': "CONCAT(managers.first_name, ' ', managers.last_name) AS name",
                     'investment_firm_name': "managers.investment_firm_name",
                     'years_experience': "managers.years_experience",
@@ -237,12 +237,11 @@ def search():
                 }
                 selected_fields = ", ".join(field_mapping[field] for field in display_fields if field in field_mapping)
 
-
             # Base query with dynamic fields
             query = f"""
                 SELECT {selected_fields}
                 FROM managers
-                LEFT JOIN portfolios ON managers.certification_ID = portfolios.manager_ID
+                LEFT JOIN portfolios ON managers.manager_id = portfolios.manager_id
                 WHERE 1=1
             """
 
@@ -271,13 +270,22 @@ def search():
             # Append filters to the query
             if filters:
                 query += " AND " + " AND ".join(filters)
-            
-            query += " GROUP BY managers.certification_ID, managers.first_name, managers.last_name, managers.investment_firm_name, managers.years_experience, managers.investment_expertise, managers.personal_intro"
 
-            
+            query += """
+            GROUP BY 
+                managers.manager_id, 
+                managers.first_name, 
+                managers.last_name, 
+                managers.investment_firm_name, 
+                managers.years_experience, 
+                managers.investment_expertise, 
+                managers.personal_intro
+            """
+
             # Execute the query
             print(f"Executing query: {query} with params: {params}")  # Debugging
             cursor.execute(query, tuple(params))
+
 
 
 
@@ -374,7 +382,7 @@ def search():
             query = f"""
                 SELECT {selected_fields}
                 FROM portfolios
-                LEFT JOIN managers ON portfolios.manager_ID = managers.certification_ID
+                LEFT JOIN managers ON portfolios.manager_id = managers.manager_id
                 WHERE 1=1
             """
 
