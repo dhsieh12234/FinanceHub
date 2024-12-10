@@ -39,13 +39,13 @@ class Writer:
         try:
             # Drop existing tables in correct order (due to foreign key constraints)
             cursor.execute("DROP TABLE IF EXISTS Portfolio_Stock_Relations")
+            cursor.execute("DROP TABLE IF EXISTS Bank_Company_Relations")
             cursor.execute("DROP TABLE IF EXISTS Portfolios")
             cursor.execute("DROP TABLE IF EXISTS Managers")
             cursor.execute("DROP TABLE IF EXISTS Stocks")
             cursor.execute("DROP TABLE IF EXISTS Companies")
             cursor.execute("DROP TABLE IF EXISTS Investment_Firms")
             cursor.execute("DROP TABLE IF EXISTS Investment_Banks")
-            cursor.execute("DROP TABLE IF EXISTS Bank_Company_Relations")
 
             # Create tables
             cursor.execute("""
@@ -125,7 +125,7 @@ class Writer:
             )""")
 
             cursor.execute("""
-            CREATE TABLE Bank_Company_Relations (
+            CREATE TABLE IF NOT EXISTS Bank_Company_Relations (
                 relation_id INT PRIMARY KEY,
                 bank_id INT,
                 company_id INT,
