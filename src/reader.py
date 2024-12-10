@@ -44,5 +44,14 @@ class Reader:
         print(self.managers_df)
         print(self.portfolios_df)
         print(self.portfolio_stock_df)
+    
+    def print_column_name(self):
+        print(self.companies_df.columns)
+        print(self.stocks_df.columns)
+        print(self.investment_banks_df.columns)
+        print(self.investment_firms_df.columns)
+        print(self.managers_df.columns)
+        print(self.portfolios_df.columns)
+        print(self.portfolio_stock_df.columns)
 
 
