@@ -319,7 +319,7 @@ body {
 #left-sidebar-portfolios,
 #left-sidebar-stocks {
     position: fixed; /* Keeps the sidebar fixed while scrolling */
-    top: 50px; /* Adjusts the distance from the top */
+    top: 70px; /* Adjusts the distance from the top */
     left: 10px; /* Aligns the sidebar slightly inward from the edge */
     width: 260px; /* Reduces width for a compact look */
     background-color: #f9f9f9; /* Light background for clarity */
