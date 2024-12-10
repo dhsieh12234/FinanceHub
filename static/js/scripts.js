@@ -739,6 +739,9 @@ async function lockInSearchPortfolios() {
                     if (selectedDisplayOptions.includes('foundation_date')) {
                         result += `<strong>Date of Foundation:</strong> ${item.foundation_date || 'N/A'}<br>`;
                     }
+                    if (selectedDisplayOptions.includes('companies_managed')) {
+                        result += `<strong>Companies Managed:</strong> ${item.companies_managed || 'N/A'}<br>`;
+                    }
                     if (selectedDisplayOptions.includes('manager')) {
                         result += `<strong>Manager:</strong> ${item.manager || 'N/A'}<br>`;
                     }

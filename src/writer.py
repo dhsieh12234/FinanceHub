@@ -37,6 +37,8 @@ class Writer:
         cursor = connection.cursor()
 
         try:
+            cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
+            
             # Drop existing tables in correct order (due to foreign key constraints)
             cursor.execute("DROP TABLE IF EXISTS Portfolio_Stock_Relations")
             cursor.execute("DROP TABLE IF EXISTS Bank_Company_Relations")

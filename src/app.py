@@ -296,31 +296,34 @@ def search():
 
 
         elif entity == 'investment_banks':
-            # Collect display fields
+            # Get display fields from the request
             display_fields = request.args.get('display_fields', '').split(',')
 
-            # Map display fields to actual database columns
+            # Define allowed fields
             allowed_fields = {
                 "name": "investment_banks.name",
                 "location": "investment_banks.headquarters_location",
                 "industries": "investment_banks.industries",
                 "ceo_name": "investment_banks.ceo_name",
-                "foundation_date": "investment_banks.foundation_date"
+                "foundation_date": "investment_banks.foundation_date",
+                "companies_managed": "GROUP_CONCAT(DISTINCT companies.name ORDER BY companies.name ASC SEPARATOR ', ') AS companies_managed"
             }
 
             # Determine which fields to select
             selected_fields = [allowed_fields[field] for field in display_fields if field in allowed_fields]
 
-            # # Default fields if no display preferences are selected
+            # Default to all fields if no display preferences are selected
             if not selected_fields:
-                selected_fields = ["investment_banks.name",  "ceo_name"]
+                selected_fields = ["investment_banks.name", "investment_banks.ceo_name"]
 
             fields_to_select = ", ".join(selected_fields)
 
-            # Base query with dynamic fields
+            # Base query
             query = f"""
                 SELECT {fields_to_select}
                 FROM investment_banks
+                LEFT JOIN bank_company_relations ON investment_banks.bank_id = bank_company_relations.bank_id
+                LEFT JOIN companies ON bank_company_relations.company_id = companies.company_id
                 WHERE 1=1
             """
 
@@ -347,11 +350,23 @@ def search():
             if filters:
                 query += " AND " + " AND ".join(filters)
 
+            # Group By Clause
+            group_by_fields = [
+                "investment_banks.bank_id", 
+                "investment_banks.name", 
+                "investment_banks.headquarters_location", 
+                "investment_banks.industries", 
+                "investment_banks.ceo_name", 
+                "investment_banks.foundation_date"
+            ]
+            query += " GROUP BY " + ", ".join(group_by_fields)
+
             # Debugging log
             print(f"Executing query: {query} with params: {params}")
 
             # Execute the query
             cursor.execute(query, tuple(params))
+
 
 
         elif entity == 'investment_firms':
