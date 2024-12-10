@@ -824,11 +824,29 @@ document.addEventListener('click', hideDropdownAndShowWelcomePage);
 function handleDropdownOption(entity) {
     // Call the existing function to display the correct content
     showWindow(entity);
+    const searchWrapper = document.getElementById('entity-search-wrapper');
+    const resultsContainer = document.getElementById('results_container');
 
     // Hide the dropdown menu
     const dropdown = document.querySelector('.dropdown-content');
     if (dropdown) {
         dropdown.style.display = 'none';
+    }
+    if (entity === 'Search by Entity') {
+        // Hide the results container
+        document.getElementById('results_container').classList.add('hidden');
+
+        // Show the entity search wrapper
+        const searchWrapper = document.getElementById('entity-search-wrapper');
+        resultsContainer.classList.add('hidden');
+        searchWrapper.classList.remove('hidden');
+        searchWrapper.classList.add('visible'); // Optional: Add a visible class for styling
+
+        // Additional behavior, if needed
+        console.log('Search by entity option selected');
+    }else{
+        searchWrapper.classList.add('hidden');
+        resultsContainer.classList.remove('hidden');
     }
 }
 

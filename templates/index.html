@@ -21,7 +21,13 @@
                 <a href="#" onclick="handleDropdownOption('portfolios')">Portfolios</a>
                 <a href="#" onclick="handleDropdownOption('stocks')">Stocks</a>
             </div>
-        </div>        
+        </div> 
+        <div class="dropdown" data-visible="false">
+            <button class="dropbtn">Other Options</button>
+            <div class="dropdown-content">
+                <a href="#" onclick="handleDropdownOption('Search by Entity')">Search for a Specific Entity</a>
+            </div>
+        </div>      
     </nav>
 
     <div class="container">
@@ -573,14 +579,6 @@
         <!-- Main Content -->
         <main class="content hidden">
 
-            <!-- Stocks Search Content -->
-            <div id="stocks-tab" class="tab-content hidden">
-                <h2>Stocks Search</h2>
-                <input type="text" id="stock-search-input" placeholder="Enter stock name or symbol">
-                <button onclick="search('stocks')">Search</button>
-                <div id="stock-search-results" class="results-window"></div>
-            </div>
-
             <!-- Default Results Container -->
             <div id="results_container" class="results-window">
                 <h2>Welcome</h2>
@@ -588,7 +586,7 @@
             </div>
         
             <!-- Centered Search Section -->
-            <div id="entity-search-wrapper" class="center-wrapper">
+            <div id="entity-search-wrapper" class="center-wrapper hidden">
                 <div id="entity-search-container" class="entity-search-container">
                     <h2>Search for a Specific Entity</h2>
                     <form id="entity-search-form">

@@ -97,6 +97,10 @@ body {
     display: none;
 }
 
+.visible {
+    display: block; /* Or flex/grid, depending on layout needs */
+}
+
 .error-message {
     color: red;
     margin-top: 10px;
