@@ -49,81 +49,6 @@ function showWindow(entity) {
     }
 }
 
-async function lockInSearchPortfolios() {
-    console.log("Lock In Search for Portfolios triggered");
-
-    // Collect selected display options
-    const selectedFields = updatePortfolioDisplayPreferences();
-
-    // Collect stock symbol
-    const stockSymbol = document.getElementById('stock-symbol-input')?.value.trim() || '';
-
-    // Collect min and max year-end market value (converted to millions)
-    const minMarketValue = (document.getElementById('min-market-value')?.value || 0) * 1_000_000;
-    const maxMarketValue = (document.getElementById('max-market-value')?.value || 1_000) * 1_000_000;
-
-    // Collect min and max year-end holders
-    const minHolders = document.getElementById('min-holders')?.value || 0;
-    const maxHolders = document.getElementById('max-holders')?.value || 1_000_000;
-
-    const resultsContainer = document.getElementById('results_container');
-    if (!resultsContainer) {
-        console.error('Results container not found.');
-        return;
-    }
-
-    // Display a loading message
-    resultsContainer.innerHTML = '<p>Loading results...</p>';
-
-    try {
-        // Build query parameters
-        const params = new URLSearchParams({
-            entity: 'portfolios',
-            display_fields: selectedFields.join(','), // Send selected fields as a comma-separated string
-            stock_symbol: stockSymbol,
-            min_market_value: minMarketValue,
-            max_market_value: maxMarketValue,
-            min_holders: minHolders,
-            max_holders: maxHolders,
-        });
-
-        console.log(`Query parameters for portfolios: ${params.toString()}`); // Debugging
-
-        // Fetch results from the backend
-        const response = await fetch(`/search?${params.toString()}`);
-        const data = await response.json();
-
-        // Check and display results
-        if (data.error) {
-            resultsContainer.innerHTML = `<p>Error: ${data.error}</p>`;
-        } else if (data.length === 0) {
-            resultsContainer.innerHTML = '<p>No results found for the specified criteria.</p>';
-        } else {
-            // Render the results dynamically based on selected fields
-            resultsContainer.innerHTML = data
-                .map((item) => {
-                    return `
-                        <div class="result-item">
-                            ${selectedFields.includes('portfolio_name') ? `<strong>Portfolio Name:</strong> ${item.portfolio_name || 'N/A'}<br>` : ''}
-                            ${selectedFields.includes('stock') ? `<strong>Stock:</strong> ${item.stock || 'N/A'}<br>` : ''}
-                            ${selectedFields.includes('foundation_date') ? `<strong>Foundation Date:</strong> ${item.foundation_date || 'N/A'}<br>` : ''}
-                            ${selectedFields.includes('manager') ? `<strong>Manager:</strong> ${item.manager || 'N/A'}<br>` : ''}
-                            ${selectedFields.includes('holders') ? `<strong>Number of Holders:</strong> ${item.holders || 'N/A'}<br>` : ''}
-                            ${selectedFields.includes('year_end_market_value') ? `<strong>Year-End Market Value:</strong> $${item.year_end_market_value || 'N/A'}<br>` : ''}
-                        </div>
-                        <hr>
-                    `;
-                })
-                .join('');
-        }
-    } catch (error) {
-        console.error("Error during search:", error); // Debugging
-        resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
-    }
-}
-
-
-
 
 // Function to handle "Advanced Options"
 function showAdvancedQuery(type) {
@@ -729,7 +654,7 @@ async function lockInSearchManagers() {
                         result += `<strong>Intro:</strong> ${item.personal_intro || '<i>Not Available</i>'}<br>`;
                     }
                     if (selectedDisplayFields.includes('portfolio')) {
-                        result += `<strong>Portfolio:</strong> ${item.portfolio || '<i>Not Available</i>'}<br>`;
+                        result += `<strong>Portfolio:</strong> ${item.portfolio_owned || '<i>Not Available</i>'}<br>`;
                     }
                     if (selectedDisplayFields.includes('id')) {
                         result += `<strong>ID:</strong> ${item.id || '<i>Not Available</i>'}<br>`;
@@ -746,21 +671,27 @@ async function lockInSearchManagers() {
 
 
 
-// Function to lock in the selected filters and display results in the results_container for Portfolios
 async function lockInSearchPortfolios() {
     console.log("Lock In Search for Portfolios triggered"); // Debugging
 
     // Collect filter values
     const stockSymbol = document.getElementById('stock-symbol-input')?.value.trim() || ''; // Stock symbol input
     const minMarketValue = (document.getElementById('min-market-value')?.value || 0) * 1_000_000; // Convert millions
-    const maxMarketValue = (document.getElementById('max-market-value')?.value || 1_000_000) * 1_000_000; // Convert millions
+    const maxMarketValue = (document.getElementById('max-market-value')?.value || 1_000) * 1_000_000; // Convert millions
     const minHolders = document.getElementById('min-holders')?.value || 0;
     const maxHolders = document.getElementById('max-holders')?.value || 10_000;
 
     // Collect selected display options
     const selectedDisplayOptions = Array.from(
-        document.querySelectorAll('input[class="portfolio-display-option"]:checked')
+        document.querySelectorAll('input[name="portfolio-display-option"]:checked')
     ).map((option) => option.value);
+
+    // Ensure at least one display option is selected
+    if (selectedDisplayOptions.length === 0) {
+        console.error('No display options selected.');
+        alert('Please select at least one display option.');
+        return;
+    }
 
     const resultsContainer = document.getElementById('results_container');
     if (!resultsContainer) {
@@ -786,7 +717,12 @@ async function lockInSearchPortfolios() {
 
         // Fetch results
         const response = await fetch(`/search?${params.toString()}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
         const data = await response.json();
+        console.log("API Response:", data); // Debugging
 
         // Check and display results
         if (data.error) {
@@ -801,7 +737,7 @@ async function lockInSearchPortfolios() {
                         result += `<strong>Portfolio Name:</strong> ${item.portfolio_name || 'N/A'}<br>`;
                     }
                     if (selectedDisplayOptions.includes('stock')) {
-                        result += `<strong>Stock:</strong> ${item.stock || 'N/A'}<br>`;
+                        result += `<strong>Portfolio Content:</strong> ${item.stock_list || 'N/A'}<br>`;
                     }
                     if (selectedDisplayOptions.includes('foundation_date')) {
                         result += `<strong>Date of Foundation:</strong> ${item.foundation_date || 'N/A'}<br>`;
@@ -813,17 +749,19 @@ async function lockInSearchPortfolios() {
                         result += `<strong>Number of Holders:</strong> ${item.holders || 'N/A'}<br>`;
                     }
                     if (selectedDisplayOptions.includes('year_end_market_value')) {
-                        result += `<strong>Year-End Market Value:</strong> $${item.year_end_market_value || 'N/A'}<br>`;
+                        result += `<strong>Year-End Market Value:</strong> $${item.year_end_market_value?.toLocaleString() || 'N/A'}<br>`;
                     }
                     return `<div class="result-item">${result}</div><hr>`;
                 })
                 .join('');
         }
     } catch (error) {
-        console.error(error); // Debugging
+        console.error("Error during search:", error); // Debugging
         resultsContainer.innerHTML = `<p>Error: ${error.message}</p>`;
     }
 }
+
+
 
 
 

@@ -222,7 +222,7 @@ def search():
                     managers.years_experience, 
                     managers.investment_expertise, 
                     managers.personal_intro, 
-                    GROUP_CONCAT(portfolios.name SEPARATOR ', ') AS portfolio
+                    GROUP_CONCAT(DISTINCT portfolios.name ORDER BY portfolios.name ASC SEPARATOR '; ') AS portfolio_owned
                 """
             else:
                 # Dynamically build the fields to select
@@ -233,7 +233,7 @@ def search():
                     'years_experience': "managers.years_experience",
                     'field_of_expertise': "managers.investment_expertise",
                     'personal_intro_text': "managers.personal_intro",
-                    'portfolio': "GROUP_CONCAT(portfolios.name SEPARATOR ', ') AS portfolio"
+                    'portfolio': "GROUP_CONCAT(DISTINCT portfolios.name ORDER BY portfolios.name ASC SEPARATOR '; ') AS portfolio_owned"
                 }
                 selected_fields = ", ".join(field_mapping[field] for field in display_fields if field in field_mapping)
 
@@ -365,8 +365,9 @@ def search():
                     portfolios.name AS portfolio_name,
                     portfolios.foundation_date,
                     portfolios.year_end_market_value,
-                    portfolios.year_end_holders AS holders
-                    CONCAT(managers.first_name, ' ', managers.last_name) AS manager_name
+                    portfolios.year_end_holders AS holders,
+                    CONCAT(managers.first_name, ' ', managers.last_name) AS manager_name,
+                    GROUP_CONCAT(DISTINCT IFNULL(stocks.name, '') SEPARATOR ', ') AS stock_list
                 """
             else:
                 # Dynamically build the fields to select
@@ -375,7 +376,8 @@ def search():
                     'foundation_date': "portfolios.foundation_date",
                     'year_end_market_value': "portfolios.year_end_market_value",
                     'holders': "portfolios.year_end_holders AS holders",
-                    'manager' : "CONCAT(managers.first_name, ' ', managers.last_name) AS manager"
+                    'manager' : "CONCAT(managers.first_name, ' ', managers.last_name) AS manager",
+                    'stock': "GROUP_CONCAT(DISTINCT IFNULL(stocks.name, '') SEPARATOR ', ') AS stock_list"
                 }
                 selected_fields = ", ".join(field_mapping[field] for field in display_fields if field in field_mapping)
 
@@ -383,6 +385,8 @@ def search():
                 SELECT {selected_fields}
                 FROM portfolios
                 LEFT JOIN managers ON portfolios.manager_id = managers.manager_id
+                LEFT JOIN portfolio_stock_relations ON portfolios.portfolio_id = portfolio_stock_relations.portfolio_id
+                LEFT JOIN stocks ON portfolio_stock_relations.stock_id = stocks.stock_id
                 WHERE 1=1
             """
 
@@ -402,10 +406,28 @@ def search():
             if min_holders or max_holders:
                 filters.append("portfolios.year_end_holders BETWEEN %s AND %s")
                 params.extend([min_holders or 0, max_holders or float('inf')])
+            
+            # Filter by stock symbol
+            stock_symbol = request.args.get('stock_symbol', '').strip()
+            if stock_symbol:
+                filters.append("stocks.stock_code LIKE %s")
+                params.append(f"%{stock_symbol}%")
 
             # Apply filters
             if filters:
                 query += " AND " + " AND ".join(filters)
+            
+            # Group by portfolio ID to aggregate stocks
+            query += """
+            GROUP BY 
+                portfolios.portfolio_id, 
+                portfolios.name, 
+                portfolios.foundation_date, 
+                portfolios.year_end_market_value, 
+                portfolios.year_end_holders, 
+                managers.first_name, 
+                managers.last_name
+            """
 
             # Debugging: Print the query and parameters
             print(f"Selected Fields: {selected_fields}")
