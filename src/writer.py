@@ -124,6 +124,16 @@ class Writer:
                 FOREIGN KEY (stock_id) REFERENCES Stocks(stock_id)
             )""")
 
+            cursor.execute("""
+            CREATE TABLE Bank_Company_Relations (
+                relation_id INT PRIMARY KEY,
+                bank_id INT,
+                company_id INT,
+                monthly_billables INT,
+                managing_director VARCHAR(255),
+                FOREIGN KEY (bank_id) REFERENCES Investment_Banks(bank_id),
+                FOREIGN KEY (company_id) REFERENCES Companies(company_id)
+            )""")
             
 
             connection.commit()
