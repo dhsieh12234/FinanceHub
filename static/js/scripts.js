@@ -656,9 +656,6 @@ async function lockInSearchManagers() {
                     if (selectedDisplayFields.includes('portfolio')) {
                         result += `<strong>Portfolio:</strong> ${item.portfolio_owned || '<i>Not Available</i>'}<br>`;
                     }
-                    if (selectedDisplayFields.includes('id')) {
-                        result += `<strong>ID:</strong> ${item.id || '<i>Not Available</i>'}<br>`;
-                    }
                     return `<div class="result-item">${result}</div><hr>`;
                 })
                 .join('');

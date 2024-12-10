@@ -218,7 +218,7 @@ def search():
                 selected_fields = """
                     managers.manager_id, 
                     CONCAT(managers.first_name, ' ', managers.last_name) AS name,
-                    managers.investment_firm_name, 
+                    investment_firms.name AS investment_firm_name,
                     managers.years_experience, 
                     managers.investment_expertise, 
                     managers.personal_intro, 
@@ -229,7 +229,7 @@ def search():
                 field_mapping = {
                     'id': "managers.manager_id",
                     'name': "CONCAT(managers.first_name, ' ', managers.last_name) AS name",
-                    'investment_firm_name': "managers.investment_firm_name",
+                    'investment_firm_name': "investment_firms.name AS investment_firm_name",
                     'years_experience': "managers.years_experience",
                     'field_of_expertise': "managers.investment_expertise",
                     'personal_intro_text': "managers.personal_intro",
@@ -241,6 +241,7 @@ def search():
             query = f"""
                 SELECT {selected_fields}
                 FROM managers
+                LEFT JOIN investment_firms ON managers.firm_id = investment_firms.firm_id
                 LEFT JOIN portfolios ON managers.manager_id = portfolios.manager_id
                 WHERE 1=1
             """
@@ -256,7 +257,7 @@ def search():
 
             # Filter by investment firm
             if investment_firm_name:
-                filters.append("managers.investment_firm_name LIKE %s")
+                filters.append("investment_firms.name LIKE %s")
                 params.append(f"%{investment_firm_name}%")
 
             # Filter by years of experience
@@ -271,20 +272,25 @@ def search():
             if filters:
                 query += " AND " + " AND ".join(filters)
 
-            query += """
-            GROUP BY 
-                managers.manager_id, 
-                managers.first_name, 
-                managers.last_name, 
-                managers.investment_firm_name, 
-                managers.years_experience, 
-                managers.investment_expertise, 
-                managers.personal_intro
-            """
+            # Dynamically construct GROUP BY based on selected fields
+            group_by_fields = [
+                "managers.manager_id", 
+                "managers.first_name", 
+                "managers.last_name", 
+                "investment_firms.name",
+                "managers.years_experience", 
+                "managers.investment_expertise", 
+                "managers.personal_intro"
+            ]
+            query += " GROUP BY " + ", ".join(group_by_fields)
 
             # Execute the query
-            print(f"Executing query: {query} with params: {params}")  # Debugging
+            print(f"Executing query: {query}")
+            print(f"Selected Fields: {selected_fields}")  # Debugging
+            print(f"Filters: {filters}")
+            print(f"Params: {params}")
             cursor.execute(query, tuple(params))
+
 
 
 
@@ -410,7 +416,18 @@ def search():
             # Filter by stock symbol
             stock_symbol = request.args.get('stock_symbol', '').strip()
             if stock_symbol:
-                filters.append("stocks.stock_code LIKE %s")
+                # Filter portfolios containing the specified stock
+                filters.append(
+                    """
+                    EXISTS (
+                        SELECT 1
+                        FROM portfolio_stock_relations psr
+                        JOIN stocks s ON psr.stock_id = s.stock_id
+                        WHERE psr.portfolio_id = portfolios.portfolio_id
+                        AND s.stock_code LIKE %s
+                    )
+                    """
+                )
                 params.append(f"%{stock_symbol}%")
 
             # Apply filters
