@@ -845,4 +845,74 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+// Dropdown toggle functionality
+document.querySelector('.dropbtn').addEventListener('click', (event) => {
+    event.stopPropagation(); // Prevent click event from propagating to the document
+    const dropdown = document.querySelector('.dropdown-content');
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+});
+
+function hideDropdownAndShowWelcomePage(event) {
+    // Get the dropdown menu and sidebars
+    const dropdown = document.querySelector('.dropdown-content');
+    const sidebars = document.querySelectorAll('.left-sidebar');
+    
+    // Check if the clicked element is inside the dropdown or any sidebar
+    const isClickInsideDropdown = dropdown.contains(event.target);
+    const isClickInsideSidebar = Array.from(sidebars).some(sidebar => sidebar.contains(event.target));
+
+    // If clicked outside dropdown and sidebars
+    if (!isClickInsideDropdown && !isClickInsideSidebar) {
+        // Hide dropdown
+        dropdown.style.display = 'none';
+
+        // Reset to the welcome page
+        const resultsContainer = document.getElementById('results_container');
+        if (resultsContainer) {
+            resultsContainer.innerHTML = `
+                <h2>Welcome</h2>
+                <p>Select an option from the menu above to get started.</p>
+            `;
+        }
+
+        // Hide all sidebars
+        sidebars.forEach(sidebar => sidebar.classList.add('hidden'));
+    }
+}
+
+// Attach the event listener to the document
+document.addEventListener('click', hideDropdownAndShowWelcomePage);
+
+function handleDropdownOption(entity) {
+    // Call the existing function to display the correct content
+    showWindow(entity);
+
+    // Hide the dropdown menu
+    const dropdown = document.querySelector('.dropdown-content');
+    if (dropdown) {
+        dropdown.style.display = 'none';
+    }
+}
+
+function selectAllCheckboxes(entity) {
+    const sgpl = {
+        "stocks": "stock",
+        "companies": "company",
+        "portfolios": "portfolio",
+        "banks": "bank",
+        "managers": "manager"
+    };
+    const entity_sg = sgpl[entity];
+    // Get the "Select All" checkbox
+    const selectAllCheckbox = document.getElementById(`${entity}-select-all`);
+    // Get all checkboxes within the same sidebar
+    const checkboxes = document.querySelectorAll(`#left-sidebar-${entity} input[type="checkbox"][name="${entity_sg}_display_option"]`);
+    
+    // Set each checkbox's checked state to match the "Select All" checkbox
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+}
+
+
 

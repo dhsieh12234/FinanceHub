@@ -251,15 +251,24 @@ body {
 }
 
 /* Styling for Display Options */
+#left-sidebar-managers .display-options,
+#left-sidebar-portfolios .display-options,
+#left-sidebar-stocks .display-options,
 #left-sidebar-companies .display-options {
     margin-bottom: 15px; /* Adds spacing between sections */
 }
 
 /* Compact styling for checkboxes */
+#left-sidebar-managers input[type="checkbox"],
+#left-sidebar-portfolios input[type="checkbox"],
+#left-sidebar-stocks input[type="checkbox"],
 #left-sidebar-companies input[type="checkbox"] {
     margin-right: 8px;
 }
 
+#left-sidebar-managers label,
+#left-sidebar-portfolios label,
+#left-sidebar-stocks label,
 #left-sidebar-companies label {
     display: block; /* Aligns labels vertically */
     font-size: 0.9em; /* Slightly smaller font */
@@ -303,6 +312,53 @@ body {
 }
 
 #left-sidebar-companies button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+#left-sidebar-managers,
+#left-sidebar-portfolios,
+#left-sidebar-stocks {
+    position: fixed; /* Keeps the sidebar fixed while scrolling */
+    top: 50px; /* Adjusts the distance from the top */
+    left: 10px; /* Aligns the sidebar slightly inward from the edge */
+    width: 260px; /* Reduces width for a compact look */
+    background-color: #f9f9f9; /* Light background for clarity */
+    border: 1px solid #ddd; /* Subtle border for separation */
+    border-radius: 8px; /* Rounds corners */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Adds depth with shadow */
+    padding: 15px; /* Adjusts internal padding for a compact fit */
+    overflow-y: auto; /* Enables scrolling if content overflows */
+    max-height: 90vh; /* Ensures it doesn't exceed viewport height */
+}
+
+#left-sidebar-managers h3,
+#left-sidebar-portfolios h3,
+#left-sidebar-stocks h3 {
+    font-size: 1.1em; /* Slightly smaller font */
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px; /* Consistent spacing */
+}
+
+#left-sidebar-managers button,
+#left-sidebar-portfolios button,
+#left-sidebar-stocks button {
+    display: block;
+    width: 100%;
+    margin-top: 15px; /* Adds spacing before the button */
+    padding: 10px; /* Padding for better click area */
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    text-align: center;
+}
+
+#left-sidebar-managers button:hover,
+#left-sidebar-portfolios button:hover,
+#left-sidebar-stocks button:hover {
     background-color: #0056b3; /* Darker blue on hover */
 }
 
